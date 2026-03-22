@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -21,30 +22,67 @@ var renderCmd = &cobra.Command{
 		title := args[0]
 		wm, err := workspace.NewManager()
 		if err != nil {
-			fmt.Printf("Error creating workspace manager: %v\n", err)
+			if jsonFlag {
+				errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace manager: %v", err)}
+				jsonError, _ := json.Marshal(errorResponse)
+				fmt.Println(string(jsonError))
+			} else {
+				fmt.Printf("Error creating workspace manager: %v\n", err)
+			}
 			os.Exit(1)
 		}
 
 		store := storage.NewStore(wm)
 		path, err := store.Path(title)
 		if err != nil {
-			fmt.Printf("Error getting note path: %v\n", err)
+			if jsonFlag {
+				errorResponse := map[string]string{"error": fmt.Sprintf("Error getting note path: %v", err)}
+				jsonError, _ := json.Marshal(errorResponse)
+				fmt.Println(string(jsonError))
+			} else {
+				fmt.Printf("Error getting note path: %v\n", err)
+			}
 			os.Exit(1)
 		}
 
 		content, err := os.ReadFile(path)
 		if err != nil {
-			fmt.Printf("Error reading note: %v\n", err)
+			if jsonFlag {
+				errorResponse := map[string]string{"error": fmt.Sprintf("Error reading note: %v", err)}
+				jsonError, _ := json.Marshal(errorResponse)
+				fmt.Println(string(jsonError))
+			} else {
+				fmt.Printf("Error reading note: %v\n", err)
+			}
 			os.Exit(1)
 		}
 		var buf bytes.Buffer
 		err = md.Convert(content, &buf)
 		if err != nil {
-			fmt.Printf("Error rendering markdown: %v\n", err)
+			if jsonFlag {
+				errorResponse := map[string]string{"error": fmt.Sprintf("Error rendering markdown: %v", err)}
+				jsonError, _ := json.Marshal(errorResponse)
+				fmt.Println(string(jsonError))
+			} else {
+				fmt.Printf("Error rendering markdown: %v\n", err)
+			}
 			os.Exit(1)
 		}
 
-		fmt.Println(buf.String())
+		if jsonFlag {
+			jsonResponse := map[string]string{"content": buf.String()}
+			jsonData, err := json.Marshal(jsonResponse)
+			if err != nil {
+				errorResponse := map[string]string{"error": fmt.Sprintf("Error marshaling JSON: %v", err)}
+				jsonError, _ := json.Marshal(errorResponse)
+				fmt.Println(string(jsonError))
+				os.Exit(1)
+			} else {
+				fmt.Println(string(jsonData))
+			}
+		} else {
+			fmt.Println(buf.String())
+		}
 	},
 }
 

@@ -13,14 +13,10 @@ Each issue is designed to be manageable for individual AI agents to implement.
 - ✅ **Frontmatter implementation** - Notes include UUID, title, timestamps, and tags
 - ✅ **Editor integration** - Basic $EDITOR integration with vim fallback
 - ✅ **JSON output support** - List command supports --json flag
+- ✅ **Render JSON output** - Render command supports --json flag
 - ✅ **Version flag** - Global --version flag implemented
 
 ### Remaining Issues
-
-### 4.2: Add --json flag to render command
-- Modify `hotnote render` to accept `--json` flag
-- When specified, output JSON with content field containing rendered HTML
-- No extra logs or output in JSON mode
 
 ### 4.3: Add --json flag to workspace commands
 - Implement `--json` flag for all workspace commands
