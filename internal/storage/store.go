@@ -1,20 +1,27 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"hotnotego/internal/workspace"
 )
+
+// ErrWorkspaceNotInitialized is returned when workspace is not initialized
+var ErrWorkspaceNotInitialized = errors.New("workspace not initialized")
+
+// WorkspaceManager defines the interface for workspace operations needed by Store
+type WorkspaceManager interface {
+	Current() (name string, path string, err error)
+}
 
 // Store represents a storage backend for notes
 type Store struct {
-	wm *workspace.Manager
+	wm WorkspaceManager
 }
 
 // NewStore creates a new store with the given workspace manager
-func NewStore(wm *workspace.Manager) *Store {
+func NewStore(wm WorkspaceManager) *Store {
 	return &Store{wm: wm}
 }
 

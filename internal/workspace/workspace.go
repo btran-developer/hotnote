@@ -66,11 +66,22 @@ func (m *Manager) load() error {
 	if err != nil {
 		if os.IsNotExist(err) {
 			// If the file doesn't exist, that's okay. We'll leave the config as the zero value.
+			// Ensure Workspaces map is initialized
+			if m.config.Workspaces == nil {
+				m.config.Workspaces = make(map[string]string)
+			}
 			return nil
 		}
 		return err
 	}
-	return yaml.Unmarshal(data, m.config)
+	if err := yaml.Unmarshal(data, m.config); err != nil {
+		return err
+	}
+	// Ensure Workspaces map is initialized after unmarshaling
+	if m.config.Workspaces == nil {
+		m.config.Workspaces = make(map[string]string)
+	}
+	return nil
 }
 
 // save writes the configuration to file
