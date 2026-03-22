@@ -13,12 +13,54 @@ import (
 
 func getBinaryPath(t *testing.T) string {
 	wd, err := os.Getwd()
-	require.NoError(t, err)
-
-	if filepath.Base(wd) == "cmd" {
-		return filepath.Join("..", "hotnote")
+	if err != nil {
+		t.Fatal(err)
 	}
-	return "./hotnote"
+
+	// Determine project root
+	projectRoot := wd
+	if filepath.Base(wd) == "cmd" {
+		projectRoot = filepath.Dir(wd)
+	}
+
+	// Check for existing binary in project root
+	binaryPath := filepath.Join(projectRoot, "hotnote")
+	if _, err := os.Stat(binaryPath); err == nil {
+		return binaryPath
+	}
+
+	// Also check relative paths
+	paths := []string{
+		filepath.Join(projectRoot, "hotnote"),
+		filepath.Join(projectRoot, "cmd", "hotnote", "hotnote"),
+	}
+
+	for _, p := range paths {
+		if _, err := os.Stat(p); err == nil {
+			return p
+		}
+	}
+
+	// Build binary
+	t.Log("Building hotnote binary...")
+	cmd := exec.Command("go", "build", "-o", "hotnote", "./cmd/hotnote")
+	cmd.Dir = projectRoot
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("Failed to build hotnote: %v\n%s", err, output)
+	}
+	return filepath.Join(projectRoot, "hotnote")
+}
+
+func runHotnote(t *testing.T, args ...string) string {
+	binaryPath := getBinaryPath(t)
+	cmd := exec.Command(binaryPath, args...)
+	home := os.Getenv("HOME")
+	cmd.Env = append(os.Environ(), "HOME="+home)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Logf("Command failed: %v\nOutput: %s", err, string(out))
+	}
+	return string(out)
 }
 
 func setupTestConfig(t *testing.T) string {
@@ -38,33 +80,21 @@ func setupTestConfig(t *testing.T) string {
 	err = os.WriteFile(configPath, []byte(configContent), 0644)
 	require.NoError(t, err)
 
-	os.Setenv("HOME", configDir)
+	t.Setenv("HOME", configDir)
 	return configDir
-}
-
-func runHotnote(t *testing.T, args ...string) []byte {
-	binaryPath := getBinaryPath(t)
-	cmd := exec.Command(binaryPath, args...)
-	home := os.Getenv("HOME")
-	cmd.Env = append(os.Environ(), "HOME="+home)
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Logf("Command failed: %v\nOutput: %s", err, string(out))
-	}
-	return out
 }
 
 func TestWorkspaceInitJSON_Success(t *testing.T) {
 	configDir, err := os.MkdirTemp("", "hotnote-test-init-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
-	os.Setenv("HOME", configDir)
+	t.Setenv("HOME", configDir)
 
 	out := runHotnote(t, "workspace", "init", "--json")
 
 	var response map[string]string
-	err = json.Unmarshal(out, &response)
+	err = json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "message")
@@ -73,12 +103,12 @@ func TestWorkspaceInitJSON_Success(t *testing.T) {
 
 func TestWorkspaceInitJSON_AlreadyInitialized(t *testing.T) {
 	configDir := setupTestConfig(t)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "init", "--json")
 
 	var response map[string]string
-	err := json.Unmarshal(out, &response)
+	err := json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
@@ -87,12 +117,12 @@ func TestWorkspaceInitJSON_AlreadyInitialized(t *testing.T) {
 
 func TestWorkspaceListJSON_Single(t *testing.T) {
 	configDir := setupTestConfig(t)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "list", "--json")
 
 	var workspaces []map[string]interface{}
-	err := json.Unmarshal(out, &workspaces)
+	err := json.Unmarshal([]byte(out), &workspaces)
 	require.NoError(t, err)
 
 	require.Len(t, workspaces, 1)
@@ -106,7 +136,7 @@ func TestWorkspaceListJSON_Single(t *testing.T) {
 func TestWorkspaceListJSON_Multiple(t *testing.T) {
 	configDir, err := os.MkdirTemp("", "hotnote-test-list-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	workspaceDir := filepath.Join(configDir, "workspaces")
 	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
@@ -123,11 +153,11 @@ func TestWorkspaceListJSON_Multiple(t *testing.T) {
 	err = os.WriteFile(configPath, []byte(configContent), 0644)
 	require.NoError(t, err)
 
-	os.Setenv("HOME", configDir)
+	t.Setenv("HOME", configDir)
 	out := runHotnote(t, "workspace", "list", "--json")
 
 	var workspaces []map[string]interface{}
-	err = json.Unmarshal(out, &workspaces)
+	err = json.Unmarshal([]byte(out), &workspaces)
 	require.NoError(t, err)
 
 	require.Len(t, workspaces, 2)
@@ -151,7 +181,7 @@ func TestWorkspaceListJSON_Multiple(t *testing.T) {
 func TestWorkspaceUseJSON_Success(t *testing.T) {
 	configDir, err := os.MkdirTemp("", "hotnote-test-use-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	workspaceDir := filepath.Join(configDir, "workspaces")
 	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
@@ -168,11 +198,11 @@ func TestWorkspaceUseJSON_Success(t *testing.T) {
 	err = os.WriteFile(configPath, []byte(configContent), 0644)
 	require.NoError(t, err)
 
-	os.Setenv("HOME", configDir)
+	t.Setenv("HOME", configDir)
 	out := runHotnote(t, "workspace", "use", "testws", "--json")
 
 	var response map[string]string
-	err = json.Unmarshal(out, &response)
+	err = json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "message")
@@ -181,12 +211,12 @@ func TestWorkspaceUseJSON_Success(t *testing.T) {
 
 func TestWorkspaceUseJSON_NotFound(t *testing.T) {
 	configDir := setupTestConfig(t)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "use", "nonexistent", "--json")
 
 	var response map[string]string
-	err := json.Unmarshal(out, &response)
+	err := json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
@@ -196,7 +226,7 @@ func TestWorkspaceUseJSON_NotFound(t *testing.T) {
 func TestWorkspaceNewJSON_Success(t *testing.T) {
 	configDir, err := os.MkdirTemp("", "hotnote-test-new-*")
 	require.NoError(t, err)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	workspaceDir := filepath.Join(configDir, "workspaces")
 	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
@@ -211,11 +241,11 @@ func TestWorkspaceNewJSON_Success(t *testing.T) {
 	err = os.WriteFile(configPath, []byte(configContent), 0644)
 	require.NoError(t, err)
 
-	os.Setenv("HOME", configDir)
+	t.Setenv("HOME", configDir)
 	out := runHotnote(t, "workspace", "new", "newtest", "--json")
 
 	var response map[string]string
-	err = json.Unmarshal(out, &response)
+	err = json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "message")
@@ -224,12 +254,12 @@ func TestWorkspaceNewJSON_Success(t *testing.T) {
 
 func TestWorkspaceNewJSON_MissingName(t *testing.T) {
 	configDir := setupTestConfig(t)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "new", "--json")
 
 	var response map[string]string
-	err := json.Unmarshal(out, &response)
+	err := json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
@@ -238,12 +268,12 @@ func TestWorkspaceNewJSON_MissingName(t *testing.T) {
 
 func TestWorkspaceNewJSON_AlreadyExists(t *testing.T) {
 	configDir := setupTestConfig(t)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "new", "default", "--json")
 
 	var response map[string]string
-	err := json.Unmarshal(out, &response)
+	err := json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
@@ -252,11 +282,11 @@ func TestWorkspaceNewJSON_AlreadyExists(t *testing.T) {
 
 func TestWorkspaceJSON_ValidOutput(t *testing.T) {
 	configDir := setupTestConfig(t)
-	defer os.RemoveAll(configDir)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "list", "--json")
 
 	var data json.RawMessage
-	err := json.Unmarshal(out, &data)
+	err := json.Unmarshal([]byte(out), &data)
 	assert.NoError(t, err)
 }
