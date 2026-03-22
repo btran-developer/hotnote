@@ -1,0 +1,163 @@
+# Architecture Overview
+
+## Project Structure
+
+```
+hotnote/
+├── cmd/                        # Application entry points
+│   ├── hotnote/
+│   │   └── main.go             # Entry point (calls RootCmd.Execute())
+│   ├── root.go                 # Root CLI command (Cobra)
+│   ├── new.go                  # Create new note
+│   ├── list.go                 # List notes
+│   ├── open.go                 # Open note in editor
+│   ├── render.go                # Render markdown to HTML
+│   ├── workspace.go             # Workspace management commands
+│   ├── ai.go                   # AI operations (stub)
+│   └── slugify_test.go         # Tests
+│
+├── internal/                    # Private packages
+│   ├── core/
+│   │   └── models.go           # Domain models (Note, Workspace)
+│   ├── storage/
+│   │   ├── store.go            # Storage layer implementation
+│   │   └── store_test.go       # Storage tests
+│   ├── workspace/
+│   │   ├── workspace.go        # Workspace manager
+│   │   └── workspace_test.go   # Workspace tests
+│   ├── ai/                     # AI integration (stub)
+│   ├── markdown/               # Markdown processing (stub)
+│   ├── search/                 # Search functionality (stub)
+│   ├── tui/                    # Terminal UI (stub)
+│   └── cli/                    # CLI utilities (stub)
+│
+├── docs/                        # Documentation
+├── go.mod                       # Module definition
+└── README.md
+```
+
+## Component Layers
+
+```mermaid
+flowchart TB
+    subgraph CLI["CLI Layer (cmd/)"]
+        new[new]
+        list[list]
+        open[open]
+        render[render]
+    end
+
+    subgraph Internal["Internal Layer"]
+        Store[Store]
+        
+        subgraph Storage[" "]
+            WM[Workspace Manager]
+            FS[File System]
+        end
+    end
+
+    new --> Store
+    list --> Store
+    open --> Store
+    render --> Store
+
+    Store --> WM
+    Store --> FS
+
+    style CLI fill:#e1f5fe
+    style Internal fill:#f3e5f5
+    style Storage fill:#fff3e0
+```
+
+## Key Components
+
+### CLI Layer (`cmd/`)
+
+Uses [Cobra](https://github.com/spf13/cobra) for command-line parsing. Each command is a separate file.
+
+| Command | File | Purpose |
+|---------|------|---------|
+| `hotnote new` | `new.go` | Create a new note |
+| `hotnote list` | `list.go` | List all notes |
+| `hotnote open` | `open.go` | Open note in `$EDITOR` |
+| `hotnote render` | `render.go` | Render markdown to HTML |
+| `hotnote workspace` | `workspace.go` | Manage workspaces |
+
+### Internal Layer (`internal/`)
+
+Contains implementation details not exposed to external packages.
+
+#### `internal/core/models.go`
+
+Domain models representing core business entities:
+
+```go
+type Note struct {
+    ID        string    // Unique identifier (slug)
+    Title     string    // Human-readable title
+    Path      string    // Full path to note file
+    Tags      []string  // Optional tags
+    CreatedAt time.Time // Creation timestamp
+    UpdatedAt time.Time // Last modification
+}
+
+type Workspace struct {
+    RootPath string // Workspace directory path
+}
+```
+
+#### `internal/storage/store.go`
+
+File-based storage implementation. Provides methods to create and locate note files.
+
+```go
+type Store struct {
+    wm WorkspaceManager  // Depends on workspace manager
+}
+```
+
+#### `internal/workspace/workspace.go`
+
+Manages multiple note workspaces. Handles configuration persistence.
+
+```go
+type Manager struct {
+    configPath string  // ~/.config/hotnote/config.yaml
+    dataPath   string  // ~/.local/share/hotnote/workspaces/
+}
+```
+
+## Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `github.com/spf13/cobra` | CLI framework |
+| `github.com/yuin/goldmark` | Markdown to HTML conversion |
+| `github.com/google/uuid` | UUID generation |
+| `gopkg.in/yaml.v3` | Configuration serialization |
+| `github.com/stretchr/testify` | Testing assertions |
+
+## Design Decisions
+
+### Why Cobra?
+
+Cobra provides:
+- Declarative command structure
+- Built-in help generation
+- Flags and subcommand support
+- Industry standard for Go CLIs
+
+### Why File-Based Storage?
+
+- Simple, portable (just copy `.md` files)
+- Human-readable (markdown)
+- No database dependencies
+- Version-control friendly
+
+### Why `internal/` Directory?
+
+Go's `internal/` convention prevents external packages from importing private code:
+
+> "The go build command refuses to import a package that is inside `$GOPATH/src/.../internal/`"
+
+This enforces clean architectural boundaries.
