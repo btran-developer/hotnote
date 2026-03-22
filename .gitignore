@@ -25,5 +25,3 @@ go.work
 # macOS
 .DS_Store
 
-# Hotnote specific
-.ai/
