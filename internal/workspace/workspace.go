@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
+	"hotnotego/internal/fsutil"
 )
 
 var (
@@ -84,16 +85,8 @@ func (m *Manager) load() error {
 	return nil
 }
 
-// save writes the configuration to file
+// save writes the configuration to file atomically
 func (m *Manager) save() error {
-	// In a real implementation, we would marshal to YAML
-	// For this implementation, we'll write a simple YAML file
-	// A full implementation would properly serialize the YAML
-	configDir := filepath.Dir(m.configPath)
-	if err := os.MkdirAll(configDir, 0755); err != nil {
-		return fmt.Errorf("workspace: create config directory: %w", err)
-	}
-	// Write a simple YAML file
 	var workspacesYAML string
 	for name, path := range m.config.Workspaces {
 		if len(workspacesYAML) > 0 {
@@ -102,8 +95,8 @@ func (m *Manager) save() error {
 		workspacesYAML += fmt.Sprintf("  %s: %s", name, path)
 	}
 	configYAML := fmt.Sprintf("current_workspace: %s\nworkspaces:\n%s\n", m.config.CurrentWorkspace, workspacesYAML)
-	if err := os.WriteFile(m.configPath, []byte(configYAML), 0644); err != nil {
-		return fmt.Errorf("workspace: write config file: %w", err)
+	if err := fsutil.AtomicWrite(m.configPath, []byte(configYAML), 0644); err != nil {
+		return fmt.Errorf("workspace: write config: %w", err)
 	}
 	return nil
 }

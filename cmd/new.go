@@ -20,7 +20,6 @@ var newCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
-		// Generate a slug from title (lowercase, hyphen-separated)
 		id := slugify(title)
 		wm, err := workspace.NewManager()
 		if err != nil {
@@ -28,8 +27,13 @@ var newCmd = &cobra.Command{
 			os.Exit(exitorrors.ExitGeneral)
 		}
 		store := storage.NewStore(wm)
-		file, err := store.Ensure(id)
-		if err != nil {
+
+		noteID := uuid.New()
+		createdAt := time.Now().UTC().Format(time.RFC3339)
+		updatedAt := createdAt
+		frontmatter := fmt.Sprintf("---\nid: %s\ntitle: %s\ncreated_at: %s\nupdated_at: %s\ntags: []\n---\n\n# %s\n\n", noteID, title, createdAt, updatedAt, title)
+
+		if err := store.Ensure(id, []byte(frontmatter)); err != nil {
 			if errors.Is(err, os.ErrExist) {
 				fmt.Println("note already exists")
 			} else {
@@ -38,24 +42,6 @@ var newCmd = &cobra.Command{
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
-		// Create frontmatter with UUID and timestamps
-		noteID := uuid.New()
-		createdAt := time.Now().UTC().Format(time.RFC3339)
-		updatedAt := createdAt
-		frontmatter := fmt.Sprintf("---\nid: %s\ntitle: %s\ncreated_at: %s\nupdated_at: %s\ntags: []\n---\n\n# %s\n\n", noteID, title, createdAt, updatedAt, title)
-
-		// Write frontmatter to the file
-		if _, err := file.Write([]byte(frontmatter)); err != nil {
-			fmt.Printf("write frontmatter: %v\n", err)
-			os.Exit(exitorrors.ExitGeneral)
-		}
-		// Ensure data is written to disk
-		if err := file.Sync(); err != nil {
-			fmt.Printf("sync file: %v\n", err)
-			os.Exit(exitorrors.ExitGeneral)
-		}
-
-		defer file.Close()
 		fmt.Printf("Created note: %s\n", id)
 	},
 }
