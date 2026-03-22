@@ -4,22 +4,35 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"hotnotego/internal/workspace"
 )
 
+// Store represents a storage backend for notes
 type Store struct {
-	Root string
+	wm *workspace.Manager
 }
 
-func NewStore(root string) *Store {
-	return &Store{Root: root}
+// NewStore creates a new store with the given workspace manager
+func NewStore(wm *workspace.Manager) *Store {
+	return &Store{wm: wm}
 }
 
-func (s *Store) Path(id string) string {
-	return filepath.Join(s.Root, id+".md")
+// Path returns the full path for a note ID in the current workspace
+func (s *Store) Path(id string) (string, error) {
+	_, workspacePath, err := s.wm.Current()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(workspacePath, id+".md"), nil
 }
 
+// Ensure creates or opens a note file for the given ID in the current workspace
 func (s *Store) Ensure(id string) (*os.File, error) {
-	path := s.Path(id)
+	path, err := s.Path(id)
+	if err != nil {
+		return nil, err
+	}
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
 		return nil, fmt.Errorf("ensure: mkdir: %w", err)
 	}

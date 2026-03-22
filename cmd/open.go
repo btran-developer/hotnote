@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+
 	"github.com/spf13/cobra"
 	"hotnotego/internal/storage"
-	"os"
+	"hotnotego/internal/workspace"
 )
 
 var openCmd = &cobra.Command{
@@ -13,14 +16,41 @@ var openCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
-		store := storage.NewStore(dataDir)
-		path := store.Path(title)
-		content, err := os.ReadFile(path)
+		wm, err := workspace.NewManager()
 		if err != nil {
-			fmt.Printf("Error opening note: %v\n", err)
+			fmt.Printf("Error creating workspace manager: %v\n", err)
 			os.Exit(1)
 		}
-		fmt.Print(string(content))
+
+		store := storage.NewStore(wm)
+		path, err := store.Path(title)
+		if err != nil {
+			fmt.Printf("Error getting note path: %v\n", err)
+			os.Exit(1)
+		}
+
+		// Check if file exists
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			fmt.Printf("Error: note '%s' not found\n", title)
+			os.Exit(2) // Not found error code
+		}
+
+		// Determine editor to use
+		editor := os.Getenv("EDITOR")
+		if editor == "" {
+			editor = "vim" // default fallback
+		}
+
+		// Open the file in the editor
+		editorCmd := exec.Command(editor, path)
+		editorCmd.Stdin = os.Stdin
+		editorCmd.Stdout = os.Stdout
+		editorCmd.Stderr = os.Stderr
+
+		if err := editorCmd.Run(); err != nil {
+			fmt.Printf("Error opening editor: %v\n", err)
+			os.Exit(1)
+		}
 	},
 }
 

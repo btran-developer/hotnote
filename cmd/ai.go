@@ -27,3 +27,7 @@ var aiCmd = &cobra.Command{
 		}
 	},
 }
+
+func init() {
+	RootCmd.AddCommand(aiCmd)
+}

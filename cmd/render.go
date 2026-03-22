@@ -3,10 +3,12 @@ package cmd
 import (
 	"bytes"
 	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/yuin/goldmark"
 	"hotnotego/internal/storage"
-	"os"
+	"hotnotego/internal/workspace"
 )
 
 var md = goldmark.New()
@@ -17,8 +19,18 @@ var renderCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
-		store := storage.NewStore(dataDir)
-		path := store.Path(title)
+		wm, err := workspace.NewManager()
+		if err != nil {
+			fmt.Printf("Error creating workspace manager: %v\n", err)
+			os.Exit(1)
+		}
+
+		store := storage.NewStore(wm)
+		path, err := store.Path(title)
+		if err != nil {
+			fmt.Printf("Error getting note path: %v\n", err)
+			os.Exit(1)
+		}
 
 		content, err := os.ReadFile(path)
 		if err != nil {

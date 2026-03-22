@@ -5,9 +5,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"hotnotego/internal/storage"
+	"hotnotego/internal/workspace"
 )
 
 var newCmd = &cobra.Command{
@@ -18,7 +21,12 @@ var newCmd = &cobra.Command{
 		title := args[0]
 		// Generate a slug from title (lowercase, hyphen-separated)
 		id := slugify(title)
-		store := storage.NewStore(dataDir)
+		wm, err := workspace.NewManager()
+		if err != nil {
+			fmt.Printf("Error creating workspace manager: %v\n", err)
+			os.Exit(1)
+		}
+		store := storage.NewStore(wm)
 		file, err := store.Ensure(id)
 		if err != nil {
 			if errors.Is(err, os.ErrExist) {
@@ -28,9 +36,31 @@ var newCmd = &cobra.Command{
 			}
 			os.Exit(1)
 		}
+
+		// Create frontmatter with UUID and timestamps
+		noteID := uuid.New()
+		createdAt := time.Now().UTC().Format(time.RFC3339)
+		updatedAt := createdAt
+		frontmatter := fmt.Sprintf("---\nid: %s\ntitle: %s\ncreated_at: %s\nupdated_at: %s\ntags: []\n---\n\n# %s\n\n", noteID, title, createdAt, updatedAt, title)
+
+		// Write frontmatter to the file
+		if _, err := file.Write([]byte(frontmatter)); err != nil {
+			fmt.Printf("Error writing frontmatter: %v\n", err)
+			os.Exit(1)
+		}
+		// Ensure data is written to disk
+		if err := file.Sync(); err != nil {
+			fmt.Printf("Error syncing file: %v\n", err)
+			os.Exit(1)
+		}
+
 		defer file.Close()
 		fmt.Printf("Created note: %s\n", id)
 	},
+}
+
+func init() {
+	RootCmd.AddCommand(newCmd)
 }
 
 // slugify converts a string to a slug (lowercase, hyphen-separated)
