@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"hotnotego/internal/storage"
@@ -14,12 +16,16 @@ var newCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
-		// In a real implementation, we'd generate a slug from title
-		id := title // placeholder
+		// Generate a slug from title (lowercase, hyphen-separated)
+		id := slugify(title)
 		store := storage.NewStore(dataDir)
 		file, err := store.Ensure(id)
 		if err != nil {
-			fmt.Printf("Error creating note: %v\n", err)
+			if errors.Is(err, os.ErrExist) {
+				fmt.Printf("Error: note '%s' already exists\n", id)
+			} else {
+				fmt.Printf("Error creating note: %v\n", err)
+			}
 			os.Exit(1)
 		}
 		defer file.Close()
@@ -27,6 +33,19 @@ var newCmd = &cobra.Command{
 	},
 }
 
-func init() {
-	rootCmd.AddCommand(newCmd)
+// slugify converts a string to a slug (lowercase, hyphen-separated)
+func slugify(s string) string {
+	// Convert to lowercase
+	s = strings.ToLower(s)
+	// Replace spaces with hyphens
+	s = strings.ReplaceAll(s, " ", "-")
+	// Remove any non-alphanumeric characters except hyphens
+	// This is a simple implementation - in a real app you might want to use a proper slug library
+	var result strings.Builder
+	for _, r := range s {
+		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' {
+			result.WriteRune(r)
+		}
+	}
+	return result.String()
 }

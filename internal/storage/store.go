@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -20,7 +21,11 @@ func (s *Store) Path(id string) string {
 func (s *Store) Ensure(id string) (*os.File, error) {
 	path := s.Path(id)
 	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ensure: mkdir: %w", err)
 	}
-	return os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("ensure: open file: %w", err)
+	}
+	return file, nil
 }

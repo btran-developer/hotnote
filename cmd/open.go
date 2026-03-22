@@ -2,11 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"github.com/spf13/cobra"
 	"hotnotego/internal/storage"
+	"os"
 )
 
 var openCmd = &cobra.Command{
@@ -17,7 +15,7 @@ var openCmd = &cobra.Command{
 		title := args[0]
 		store := storage.NewStore(dataDir)
 		path := store.Path(title)
-		content, err := ioutil.ReadFile(path)
+		content, err := os.ReadFile(path)
 		if err != nil {
 			fmt.Printf("Error opening note: %v\n", err)
 			os.Exit(1)
@@ -27,5 +25,5 @@ var openCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(openCmd)
+	RootCmd.AddCommand(openCmd)
 }

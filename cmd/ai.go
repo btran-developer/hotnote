@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"github.com/spf13/cobra"
 )
 
@@ -15,7 +14,7 @@ var aiCmd = &cobra.Command{
 			fmt.Println("Available commands: write, summarize, query")
 			return
 		}
-		
+
 		switch args[0] {
 		case "write":
 			fmt.Println("AI write functionality would generate content based on input")
@@ -27,8 +26,4 @@ var aiCmd = &cobra.Command{
 			fmt.Printf("Unknown AI command: %s\n", args[0])
 		}
 	},
-}
-
-func init() {
-	rootCmd.AddCommand(aiCmd)
 }

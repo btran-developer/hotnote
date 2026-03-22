@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"github.com/spf13/cobra"
 	"hotnotego/internal/storage"
+	"os"
+	"path/filepath"
 )
 
 var listCmd = &cobra.Command{
@@ -18,7 +18,7 @@ var listCmd = &cobra.Command{
 			fmt.Printf("Error reading notes directory: %v\n", err)
 			os.Exit(1)
 		}
-		
+
 		for _, file := range files {
 			if !file.IsDir() && filepath.Ext(file.Name()) == ".md" {
 				fmt.Println(file.Name())
@@ -28,5 +28,5 @@ var listCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(listCmd)
+	RootCmd.AddCommand(listCmd)
 }
