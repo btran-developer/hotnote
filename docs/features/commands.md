@@ -265,3 +265,63 @@ All subsequent `new`, `list`, `open`, and `render` commands will use the selecte
 |---------|----------|
 | Config | `~/.config/hotnote/config.yaml` |
 | Notes | `~/.local/share/hotnote/workspaces/<name>/` |
+
+## Adding Commands
+
+To add a new command, follow this pattern:
+
+1. Create a new file: `cmd/<name>.go`
+2. Define the command variable:
+
+   ```go
+   var <Name>Cmd = &cobra.Command{
+       Use:   "<name>",
+       Short: "Description of what it does",
+       Run:   run<Name>,
+   }
+
+   func run<Name>(cmd *cobra.Command, args []string) {
+       // Implementation
+   }
+   ```
+
+3. Register in `init()` at the bottom of the file:
+
+   ```go
+   func init() {
+       RootCmd.AddCommand(<Name>Cmd)
+   }
+   ```
+
+### Conventions
+
+| Item | Convention |
+|------|------------|
+| Filename | `<name>.go` (lowercase) |
+| Variable | `<Name>Cmd` (PascalCase + "Cmd") |
+| Use string | `<name>` (lowercase) |
+| Init function | Bottom of file |
+
+### Example
+
+For a `delete` command:
+
+```go
+// cmd/delete.go
+package cmd
+
+var DeleteCmd = &cobra.Command{
+    Use:   "delete <note>",
+    Short: "Delete a note",
+    Args:  cobra.ExactArgs(1),
+    Run:   runDelete,
+}
+
+func runDelete(cmd *cobra.Command, args []string) {
+    // Implementation
+}
+
+func init() {
+    RootCmd.AddCommand(DeleteCmd)
+}
+```
