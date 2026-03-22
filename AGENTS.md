@@ -28,6 +28,16 @@
 ## Testing
 - Table-driven; `*_test.go`
 - Mock interfaces- Benchmark only when needed
+- Always add unit tests for new code changes
+- Clean up artifacts using `t.Cleanup()` or `defer`
+- Do not leave test data in user directories (~/.config, ~/.local)
+
+## Verification
+- Run `go test -v ./...` before committing
+- For manual CLI verification, clean up after:
+  - Config files: `rm -f ~/.config/hotnote/config.yaml`
+  - Workspace directories: `rm -rf ~/.local/share/hotnote/workspaces/`
+  - Built binaries: `rm -f ./hotnote` or `rm -f cmd/hotnote/hotnote`
 
 ## Concurrency
 - Channels over mutexes
