@@ -12,4 +12,5 @@ type Note struct {
 }
 
 type Workspace struct {
-	RootPath string}
+	RootPath string
+}
