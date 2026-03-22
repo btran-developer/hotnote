@@ -24,11 +24,11 @@ var renderCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace manager: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error creating workspace manager: %v\n", err)
+				fmt.Printf("create workspace manager: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -37,11 +37,11 @@ var renderCmd = &cobra.Command{
 		path, err := store.Path(title)
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error getting note path: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("get note path: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error getting note path: %v\n", err)
+				fmt.Printf("get note path: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -49,11 +49,11 @@ var renderCmd = &cobra.Command{
 		content, err := os.ReadFile(path)
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error reading note: %v", err)}
+				errorResponse := map[string]string{"error": "note not found"}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error reading note: %v\n", err)
+				fmt.Println("note not found")
 			}
 			os.Exit(exitorrors.ExitNotFound)
 		}
@@ -61,11 +61,11 @@ var renderCmd = &cobra.Command{
 		err = md.Convert(content, &buf)
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error rendering markdown: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("render markdown: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error rendering markdown: %v\n", err)
+				fmt.Printf("render markdown: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -74,7 +74,7 @@ var renderCmd = &cobra.Command{
 			jsonResponse := map[string]string{"content": buf.String()}
 			jsonData, err := json.Marshal(jsonResponse)
 			if err != nil {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error marshaling JSON: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("marshal JSON: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 				os.Exit(exitorrors.ExitGeneral)

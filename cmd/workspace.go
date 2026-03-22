@@ -24,11 +24,11 @@ var workspaceInitCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace manager: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error creating workspace manager: %v\n", err)
+				fmt.Printf("create workspace manager: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -39,15 +39,15 @@ var workspaceInitCmd = &cobra.Command{
 					jsonError, _ := json.Marshal(errorResponse)
 					fmt.Println(string(jsonError))
 				} else {
-					fmt.Println("Error: workspace already initialized")
+					fmt.Println("workspace already initialized")
 				}
 			} else {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("Error initializing workspace: %v", err)}
+					errorResponse := map[string]string{"error": fmt.Sprintf("init workspace: %v", err)}
 					jsonError, _ := json.Marshal(errorResponse)
 					fmt.Println(string(jsonError))
 				} else {
-					fmt.Printf("Error initializing workspace: %v\n", err)
+					fmt.Printf("init workspace: %v\n", err)
 				}
 			}
 			os.Exit(exitorrors.ExitGeneral)
@@ -69,22 +69,22 @@ var workspaceListCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace manager: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error creating workspace manager: %v\n", err)
+				fmt.Printf("create workspace manager: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 		workspaces, current, err := wm.List()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error listing workspaces: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("list workspaces: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error listing workspaces: %v\n", err)
+				fmt.Printf("list workspaces: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -126,31 +126,31 @@ var workspaceUseCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace manager: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error creating workspace manager: %v\n", err)
+				fmt.Printf("create workspace manager: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 		if err := wm.Use(name); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceDoesNotExist) {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("workspace '%s' not found", name)}
+					errorResponse := map[string]string{"error": "workspace not found"}
 					jsonError, _ := json.Marshal(errorResponse)
 					fmt.Println(string(jsonError))
 				} else {
-					fmt.Printf("Error: workspace '%s' not found\n", name)
+					fmt.Println("workspace not found")
 				}
 				os.Exit(exitorrors.ExitNotFound)
 			} else {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("Error using workspace: %v", err)}
+					errorResponse := map[string]string{"error": fmt.Sprintf("use workspace: %v", err)}
 					jsonError, _ := json.Marshal(errorResponse)
 					fmt.Println(string(jsonError))
 				} else {
-					fmt.Printf("Error using workspace: %v\n", err)
+					fmt.Printf("use workspace: %v\n", err)
 				}
 				os.Exit(exitorrors.ExitGeneral)
 			}
@@ -171,11 +171,11 @@ var workspaceNewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": "workspace name is required"}
+				errorResponse := map[string]string{"error": "workspace name required"}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Println("Error: workspace name is required")
+				fmt.Println("workspace name required")
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -189,30 +189,30 @@ var workspaceNewCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace manager: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error creating workspace manager: %v\n", err)
+				fmt.Printf("create workspace manager: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 		if err := wm.New(name, path); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("workspace '%s' already exists", name)}
+					errorResponse := map[string]string{"error": "workspace already exists"}
 					jsonError, _ := json.Marshal(errorResponse)
 					fmt.Println(string(jsonError))
 				} else {
-					fmt.Printf("Error: workspace '%s' already exists\n", name)
+					fmt.Println("workspace already exists")
 				}
 			} else {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace: %v", err)}
+					errorResponse := map[string]string{"error": fmt.Sprintf("create workspace: %v", err)}
 					jsonError, _ := json.Marshal(errorResponse)
 					fmt.Println(string(jsonError))
 				} else {
-					fmt.Printf("Error creating workspace: %v\n", err)
+					fmt.Printf("create workspace: %v\n", err)
 				}
 			}
 			os.Exit(exitorrors.ExitGeneral)

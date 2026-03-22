@@ -19,11 +19,11 @@ var listCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error creating workspace manager: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error creating workspace manager: %v\n", err)
+				fmt.Printf("create workspace manager: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -31,11 +31,11 @@ var listCmd = &cobra.Command{
 		_, workspacePath, err := wm.Current()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error getting current workspace: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("get current workspace: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error getting current workspace: %v\n", err)
+				fmt.Printf("get current workspace: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -43,11 +43,11 @@ var listCmd = &cobra.Command{
 		files, err := os.ReadDir(workspacePath)
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error reading notes directory: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("read notes directory: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {
-				fmt.Printf("Error reading notes directory: %v\n", err)
+				fmt.Printf("read notes directory: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -71,7 +71,7 @@ var listCmd = &cobra.Command{
 			}
 			jsonData, err := json.Marshal(notes)
 			if err != nil {
-				errorResponse := map[string]string{"error": fmt.Sprintf("Error marshaling JSON: %v", err)}
+				errorResponse := map[string]string{"error": fmt.Sprintf("marshal JSON: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
 			} else {

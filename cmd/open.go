@@ -19,21 +19,21 @@ var openCmd = &cobra.Command{
 		title := args[0]
 		wm, err := workspace.NewManager()
 		if err != nil {
-			fmt.Printf("Error creating workspace manager: %v\n", err)
+			fmt.Printf("create workspace manager: %v\n", err)
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		store := storage.NewStore(wm)
 		path, err := store.Path(title)
 		if err != nil {
-			fmt.Printf("Error getting note path: %v\n", err)
+			fmt.Printf("get note path: %v\n", err)
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		// Check if file exists
 		if _, err := os.Stat(path); os.IsNotExist(err) {
-			fmt.Printf("Error: note '%s' not found\n", title)
-			os.Exit(exitorrors.ExitNotFound) // Not found error code
+			fmt.Println("note not found")
+			os.Exit(exitorrors.ExitNotFound)
 		}
 
 		// Determine editor to use
@@ -49,7 +49,7 @@ var openCmd = &cobra.Command{
 		editorCmd.Stderr = os.Stderr
 
 		if err := editorCmd.Run(); err != nil {
-			fmt.Printf("Error opening editor: %v\n", err)
+			fmt.Printf("open editor: %v\n", err)
 			os.Exit(exitorrors.ExitGeneral)
 		}
 	},

@@ -17,6 +17,7 @@ Each issue is designed to be manageable for individual AI agents to implement.
 - ✅ **Version flag** - Global --version flag implemented
 - ✅ **Workspace JSON output** - All workspace commands support --json flag
 - ✅ **Error exit codes** - Proper exit codes (0-4) implemented per CLI Spec
+- ✅ **Standardized error messages** - Error messages match CLI Spec formats (lowercase, no "Error:" prefix)
 
 ### Remaining Issues
 
@@ -32,7 +33,7 @@ Based on CLI Spec §17-23 and throughout
   - 4: Config error
 - Ensure all commands return appropriate exit codes
 
-**Issue 5.2: Standardize error messages**
+**Issue 5.2: Standardize error messages** ✅ Complete
 - Make error messages clear and consistent
 - Match expected formats from CLI Spec where specified
 - Include relevant context (e.g., note name, path)

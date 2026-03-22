@@ -24,16 +24,16 @@ var newCmd = &cobra.Command{
 		id := slugify(title)
 		wm, err := workspace.NewManager()
 		if err != nil {
-			fmt.Printf("Error creating workspace manager: %v\n", err)
+			fmt.Printf("create workspace manager: %v\n", err)
 			os.Exit(exitorrors.ExitGeneral)
 		}
 		store := storage.NewStore(wm)
 		file, err := store.Ensure(id)
 		if err != nil {
 			if errors.Is(err, os.ErrExist) {
-				fmt.Printf("Error: note '%s' already exists\n", id)
+				fmt.Println("note already exists")
 			} else {
-				fmt.Printf("Error creating note: %v\n", err)
+				fmt.Printf("create note: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -46,12 +46,12 @@ var newCmd = &cobra.Command{
 
 		// Write frontmatter to the file
 		if _, err := file.Write([]byte(frontmatter)); err != nil {
-			fmt.Printf("Error writing frontmatter: %v\n", err)
+			fmt.Printf("write frontmatter: %v\n", err)
 			os.Exit(exitorrors.ExitGeneral)
 		}
 		// Ensure data is written to disk
 		if err := file.Sync(); err != nil {
-			fmt.Printf("Error syncing file: %v\n", err)
+			fmt.Printf("sync file: %v\n", err)
 			os.Exit(exitorrors.ExitGeneral)
 		}
 

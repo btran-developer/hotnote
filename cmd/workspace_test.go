@@ -190,7 +190,7 @@ func TestWorkspaceUseJSON_NotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "workspace 'nonexistent' not found", response["error"])
+	assert.Equal(t, "workspace not found", response["error"])
 }
 
 func TestWorkspaceNewJSON_Success(t *testing.T) {
@@ -233,7 +233,7 @@ func TestWorkspaceNewJSON_MissingName(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "workspace name is required", response["error"])
+	assert.Equal(t, "workspace name required", response["error"])
 }
 
 func TestWorkspaceNewJSON_AlreadyExists(t *testing.T) {
@@ -247,7 +247,7 @@ func TestWorkspaceNewJSON_AlreadyExists(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "workspace 'default' already exists", response["error"])
+	assert.Equal(t, "workspace already exists", response["error"])
 }
 
 func TestWorkspaceJSON_ValidOutput(t *testing.T) {
