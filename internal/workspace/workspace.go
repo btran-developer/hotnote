@@ -34,7 +34,7 @@ type Manager struct {
 func NewManager() (*Manager, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("workspace: get home directory: %w", err)
 	}
 
 	configDir := filepath.Join(home, ".config", "hotnote")
@@ -42,7 +42,7 @@ func NewManager() (*Manager, error) {
 
 	// Ensure config directory exists
 	if err := os.MkdirAll(configDir, 0755); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("workspace: create config directory: %w", err)
 	}
 
 	m := &Manager{
@@ -54,7 +54,7 @@ func NewManager() (*Manager, error) {
 
 	// Load existing config if it exists
 	if err := m.load(); err != nil && !os.IsNotExist(err) {
-		return nil, err
+		return nil, fmt.Errorf("workspace: load config: %w", err)
 	}
 
 	return m, nil
@@ -72,10 +72,10 @@ func (m *Manager) load() error {
 			}
 			return nil
 		}
-		return err
+		return fmt.Errorf("workspace: read config file: %w", err)
 	}
 	if err := yaml.Unmarshal(data, m.config); err != nil {
-		return err
+		return fmt.Errorf("workspace: unmarshal config: %w", err)
 	}
 	// Ensure Workspaces map is initialized after unmarshaling
 	if m.config.Workspaces == nil {
@@ -91,7 +91,7 @@ func (m *Manager) save() error {
 	// A full implementation would properly serialize the YAML
 	configDir := filepath.Dir(m.configPath)
 	if err := os.MkdirAll(configDir, 0755); err != nil {
-		return err
+		return fmt.Errorf("workspace: create config directory: %w", err)
 	}
 	// Write a simple YAML file
 	var workspacesYAML string
@@ -102,13 +102,16 @@ func (m *Manager) save() error {
 		workspacesYAML += fmt.Sprintf("  %s: %s", name, path)
 	}
 	configYAML := fmt.Sprintf("current_workspace: %s\nworkspaces:\n%s\n", m.config.CurrentWorkspace, workspacesYAML)
-	return os.WriteFile(m.configPath, []byte(configYAML), 0644)
+	if err := os.WriteFile(m.configPath, []byte(configYAML), 0644); err != nil {
+		return fmt.Errorf("workspace: write config file: %w", err)
+	}
+	return nil
 }
 
 // Init initializes the default workspace
 func (m *Manager) Init() error {
 	if err := m.load(); err != nil {
-		return err
+		return fmt.Errorf("workspace: load config: %w", err)
 	}
 
 	// Check if already initialized
@@ -120,19 +123,19 @@ func (m *Manager) Init() error {
 	m.config.CurrentWorkspace = "default"
 	home, err := os.UserHomeDir()
 	if err != nil {
-		return err
+		return fmt.Errorf("workspace: get home directory: %w", err)
 	}
 	defaultPath := filepath.Join(home, ".local", "share", "hotnote", "workspaces", "default")
 	m.config.Workspaces["default"] = defaultPath
 
 	// Create the directory
 	if err := os.MkdirAll(defaultPath, 0755); err != nil {
-		return err
+		return fmt.Errorf("workspace: create workspace directory: %w", err)
 	}
 
 	// Save config
 	if err := m.save(); err != nil {
-		return err
+		return fmt.Errorf("workspace: save config: %w", err)
 	}
 
 	return nil
@@ -141,7 +144,7 @@ func (m *Manager) Init() error {
 // List returns the list of workspaces
 func (m *Manager) List() (map[string]string, string, error) {
 	if err := m.load(); err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("workspace: load config: %w", err)
 	}
 	return m.config.Workspaces, m.config.CurrentWorkspace, nil
 }
@@ -149,7 +152,7 @@ func (m *Manager) List() (map[string]string, string, error) {
 // Use sets the current workspace
 func (m *Manager) Use(name string) error {
 	if err := m.load(); err != nil {
-		return err
+		return fmt.Errorf("workspace: load config: %w", err)
 	}
 
 	if _, exists := m.config.Workspaces[name]; !exists {
@@ -157,7 +160,7 @@ func (m *Manager) Use(name string) error {
 	}
 	m.config.CurrentWorkspace = name
 	if err := m.save(); err != nil {
-		return err
+		return fmt.Errorf("workspace: save config: %w", err)
 	}
 	return nil
 }
@@ -165,7 +168,7 @@ func (m *Manager) Use(name string) error {
 // New creates a new workspace
 func (m *Manager) New(name string, path string) error {
 	if err := m.load(); err != nil {
-		return err
+		return fmt.Errorf("workspace: load config: %w", err)
 	}
 
 	if _, exists := m.config.Workspaces[name]; exists {
@@ -177,7 +180,7 @@ func (m *Manager) New(name string, path string) error {
 	if path == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return err
+			return fmt.Errorf("workspace: get home directory: %w", err)
 		}
 		workspacePath = filepath.Join(home, ".local", "share", "hotnote", "workspaces", name)
 	} else {
@@ -186,7 +189,7 @@ func (m *Manager) New(name string, path string) error {
 
 	// Create the workspace directory
 	if err := os.MkdirAll(workspacePath, 0755); err != nil {
-		return err
+		return fmt.Errorf("workspace: create workspace directory: %w", err)
 	}
 
 	// Add to workspaces
@@ -194,7 +197,7 @@ func (m *Manager) New(name string, path string) error {
 
 	// Save config
 	if err := m.save(); err != nil {
-		return err
+		return fmt.Errorf("workspace: save config: %w", err)
 	}
 
 	return nil
@@ -203,7 +206,7 @@ func (m *Manager) New(name string, path string) error {
 // Current returns the current workspace name and path
 func (m *Manager) Current() (string, string, error) {
 	if err := m.load(); err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("workspace: load config: %w", err)
 	}
 	if m.config.CurrentWorkspace == "" {
 		return "", "", ErrWorkspaceNotInitialized

@@ -29,7 +29,7 @@ func NewStore(wm WorkspaceManager) *Store {
 func (s *Store) Path(id string) (string, error) {
 	_, workspacePath, err := s.wm.Current()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("storage: get current workspace: %w", err)
 	}
 	return filepath.Join(workspacePath, id+".md"), nil
 }

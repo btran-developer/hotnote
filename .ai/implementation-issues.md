@@ -38,9 +38,10 @@ Based on CLI Spec §17-23 and throughout
 - Match expected formats from CLI Spec where specified
 - Include relevant context (e.g., note name, path)
 
-**Issue 5.3: Improve error wrapping**
+**Issue 5.3: Improve error wrapping** ✅ Complete
 - Continue using `fmt.Errorf("operation: %w", err)` pattern
 - Add context to all errors from storage layer
+- Add context to all errors from workspace layer
 - Ensure errors are meaningful to users
 
 ### 7. Slugify Enhancement (Partially Missing)
