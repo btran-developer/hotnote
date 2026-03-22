@@ -40,7 +40,12 @@ func TestSlugify_Basic(t *testing.T) {
 		{
 			name:     "multiple spaces",
 			input:    "A  B   C",
-			expected: "a--b---c",
+			expected: "a-b-c",
+		},
+		{
+			name:     "consecutive hyphens from input",
+			input:    "Note---Test",
+			expected: "note-test",
 		},
 		{
 			name:     "with punctuation",
@@ -71,6 +76,11 @@ func TestSlugify_Basic(t *testing.T) {
 			name:     "unicode characters",
 			input:    "café",
 			expected: "caf",
+		},
+		{
+			name:     "leading and trailing spaces",
+			input:    "  leading and trailing  ",
+			expected: "leading-and-trailing",
 		},
 		{
 			name:     "mixed case with numbers",

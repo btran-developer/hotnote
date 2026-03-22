@@ -66,17 +66,18 @@ func init() {
 
 // slugify converts a string to a slug (lowercase, hyphen-separated)
 func slugify(s string) string {
-	// Convert to lowercase
 	s = strings.ToLower(s)
-	// Replace spaces with hyphens
 	s = strings.ReplaceAll(s, " ", "-")
-	// Remove any non-alphanumeric characters except hyphens
-	// This is a simple implementation - in a real app you might want to use a proper slug library
 	var result strings.Builder
 	for _, r := range s {
 		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' {
 			result.WriteRune(r)
 		}
 	}
-	return result.String()
+	s = result.String()
+	for strings.Contains(s, "--") {
+		s = strings.ReplaceAll(s, "--", "-")
+	}
+	s = strings.Trim(s, "-")
+	return s
 }

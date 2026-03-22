@@ -57,6 +57,18 @@ The verification plan consists of:
 - PRD Ref: §63, §68
 - CLI Spec Ref: §32-33
 
+**Test Case 1.2.1: Consecutive hyphens**
+- Command: `hotnote new "Note---With---Hyphens"`
+- Expected: Creates file `note-with-hyphens.md`
+- Verify: Multiple consecutive hyphens collapsed to single hyphen
+- PRD Ref: §63
+
+**Test Case 1.2.2: Leading/trailing spaces**
+- Command: `hotnote new "  Spaces Around  "`
+- Expected: Creates file `spaces-around.md`
+- Verify: Leading/trailing hyphens removed
+- PRD Ref: §63
+
 **Test Case 1.3: Collision handling**
 - Command: 
   1. `hotnote new "Test"`
