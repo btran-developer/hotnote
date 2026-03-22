@@ -41,12 +41,16 @@
 - Frontmatter: YAML
 
 ## Git Commit Conventions
-- Follow Conventional Commits specification (https://www.conventionalcommits.org/)
-- Commit message format: `<type>[optional scope]: <description>`
-- Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
-- Examples:
-  - feat: add user authentication  - fix: resolve nil pointer exception in markdown parser
-  - docs: update API documentation for new endpoints
-  - refactor: simplify slug generation logic
-  - test: add unit tests for storage layer
-  - chore: update dependencies
+- Follow Conventional Commits (conventionalcommits.org)
+- Format: `<type>(<scope>): <description>`
+- Use imperative mood: "add" not "added"
+- Body (bullets): only when multiple changes
+
+Single: feat(commands): add delete command
+
+Multiple:
+feat(commands): add delete command
+- Implement runDelete function
+- Add --force flag
+
+Examples: feat, fix, docs, refactor, test, chore
