@@ -15,12 +15,10 @@ Each issue is designed to be manageable for individual AI agents to implement.
 - ✅ **JSON output support** - List command supports --json flag
 - ✅ **Render JSON output** - Render command supports --json flag
 - ✅ **Version flag** - Global --version flag implemented
+- ✅ **Workspace JSON output** - All workspace commands support --json flag
+- ✅ **Error exit codes** - Proper exit codes (0-4) implemented per CLI Spec
 
 ### Remaining Issues
-
-### 4.3: Add --json flag to workspace commands
-- Implement `--json` flag for all workspace commands
-- Follow the JSON formats specified in CLI Spec
 
 ### 5. Error Handling Improvement (Partially Missing)
 Based on CLI Spec §17-23 and throughout

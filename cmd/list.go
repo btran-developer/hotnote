@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
+	exitorrors "hotnotego/internal/errors"
 	"hotnotego/internal/workspace"
 )
 
@@ -24,7 +25,7 @@ var listCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error creating workspace manager: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 
 		_, workspacePath, err := wm.Current()
@@ -36,7 +37,7 @@ var listCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error getting current workspace: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 
 		files, err := os.ReadDir(workspacePath)
@@ -48,7 +49,7 @@ var listCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error reading notes directory: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 
 		if jsonFlag {

@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	exitorrors "hotnotego/internal/errors"
 )
 
 var RootCmd = &cobra.Command{
@@ -20,7 +21,7 @@ var jsonFlag bool
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+		os.Exit(exitorrors.ExitGeneral)
 	}
 }
 

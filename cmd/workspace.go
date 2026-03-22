@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	exitorrors "hotnotego/internal/errors"
 	"hotnotego/internal/workspace"
 )
 
@@ -29,7 +30,7 @@ var workspaceInitCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error creating workspace manager: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		if err := wm.Init(); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
@@ -49,7 +50,7 @@ var workspaceInitCmd = &cobra.Command{
 					fmt.Printf("Error initializing workspace: %v\n", err)
 				}
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		if jsonFlag {
 			response := map[string]string{"message": "Initialized workspace: default"}
@@ -74,7 +75,7 @@ var workspaceListCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error creating workspace manager: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		workspaces, current, err := wm.List()
 		if err != nil {
@@ -85,7 +86,7 @@ var workspaceListCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error listing workspaces: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		if jsonFlag {
 			var wsList []map[string]interface{}
@@ -131,7 +132,7 @@ var workspaceUseCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error creating workspace manager: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		if err := wm.Use(name); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceDoesNotExist) {
@@ -142,6 +143,7 @@ var workspaceUseCmd = &cobra.Command{
 				} else {
 					fmt.Printf("Error: workspace '%s' not found\n", name)
 				}
+				os.Exit(exitorrors.ExitNotFound)
 			} else {
 				if jsonFlag {
 					errorResponse := map[string]string{"error": fmt.Sprintf("Error using workspace: %v", err)}
@@ -150,8 +152,8 @@ var workspaceUseCmd = &cobra.Command{
 				} else {
 					fmt.Printf("Error using workspace: %v\n", err)
 				}
+				os.Exit(exitorrors.ExitGeneral)
 			}
-			os.Exit(1)
 		}
 		if jsonFlag {
 			response := map[string]string{"message": fmt.Sprintf("Switched to workspace: %s", name)}
@@ -175,7 +177,7 @@ var workspaceNewCmd = &cobra.Command{
 			} else {
 				fmt.Println("Error: workspace name is required")
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		name := args[0]
 
@@ -193,7 +195,7 @@ var workspaceNewCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error creating workspace manager: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		if err := wm.New(name, path); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
@@ -213,7 +215,7 @@ var workspaceNewCmd = &cobra.Command{
 					fmt.Printf("Error creating workspace: %v\n", err)
 				}
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		if jsonFlag {
 			response := map[string]string{"message": fmt.Sprintf("Created workspace: %s", name)}

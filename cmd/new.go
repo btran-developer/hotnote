@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
+	exitorrors "hotnotego/internal/errors"
 	"hotnotego/internal/storage"
 	"hotnotego/internal/workspace"
 )
@@ -24,7 +25,7 @@ var newCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			fmt.Printf("Error creating workspace manager: %v\n", err)
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		store := storage.NewStore(wm)
 		file, err := store.Ensure(id)
@@ -34,7 +35,7 @@ var newCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error creating note: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		// Create frontmatter with UUID and timestamps
@@ -46,12 +47,12 @@ var newCmd = &cobra.Command{
 		// Write frontmatter to the file
 		if _, err := file.Write([]byte(frontmatter)); err != nil {
 			fmt.Printf("Error writing frontmatter: %v\n", err)
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 		// Ensure data is written to disk
 		if err := file.Sync(); err != nil {
 			fmt.Printf("Error syncing file: %v\n", err)
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		defer file.Close()

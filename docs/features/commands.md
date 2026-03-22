@@ -11,6 +11,18 @@ These flags work with all commands:
 | `--data-dir` | `-d` | `notes` | Data directory for notes |
 | `--json` | | `false` | Output in JSON format |
 
+## Exit Codes
+
+Hotnote returns the following exit codes:
+
+| Code | Meaning | Example |
+|------|---------|---------|
+| 0 | Success | Command executed successfully |
+| 1 | General error | Unexpected error occurred |
+| 2 | Not found | Note or workspace not found |
+| 3 | Invalid input | Missing required arguments |
+| 4 | Config error | Workspace not initialized |
+
 ## hotnote new
 
 Create a new note with YAML frontmatter.

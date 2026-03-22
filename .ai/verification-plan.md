@@ -26,7 +26,7 @@ The verification plan consists of:
 | Render note to HTML | PRD §50, CLI Spec §112 | Implemented | Test `hotnote render` |
 | Workspace management | PRD §52-55, CLI Spec §127-138 | Not implemented | Test workspace commands |
 | JSON output option | PRD §109, CLI Spec §11-12, §47-51, etc. | Not implemented | Test `--json` flag |
-| Proper error codes | CLI Spec §17-23 | Not implemented | Test exit codes |
+| Proper error codes | CLI Spec §17-23 | Implemented | Test exit codes |
 | Frontmatter with UUID/timestamps | PRD §72-78 | Not implemented | Check note files |
 
 ### Non-Functional Requirements
@@ -181,11 +181,12 @@ The verification plan consists of:
 
 **Test Case 6.4: Exit codes**
 - Commands:
-  - Success: `hotnote list` (when configured)
-  - General error: Invalid command
-  - Not found: `hotnote open non-existent`
-  - Invalid input: `hotnote new` (no title)
-- Expected: Corresponding exit codes (0,1,2,3)
+  - Success: `hotnote list` (when configured) → exit 0
+  - General error: Invalid command → exit 1
+  - Not found: `hotnote open non-existent` → exit 2
+  - Invalid input: `hotnote new` (no title) → exit 1
+  - Config error: `hotnote list` (no workspace) → exit 4
+- Expected: Corresponding exit codes (0,1,2,3,4)
 - Verify: Check `$?` after each command
 - CLI Spec Ref: §17-23
 

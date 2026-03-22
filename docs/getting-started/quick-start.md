@@ -69,6 +69,22 @@ hotnote workspace use notes    # Switch to workspace
 
 ## Debugging
 
+### Exit codes
+
+Check the exit code to understand what went wrong:
+
+```bash
+./hotnote open missing-note; echo $?
+# Output: 2 (not found)
+```
+
+| Code | Meaning |
+|------|---------|
+| 1 | General error |
+| 2 | Not found |
+| 3 | Invalid input |
+| 4 | Config error |
+
 ### Verbose output
 
 Set the `$DEBUG` environment variable:

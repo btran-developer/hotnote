@@ -40,6 +40,23 @@ go build -o hotnote ./cmd/hotnote
 ./hotnote ai summarize my-note./hotnote ai query "distributed systems"
 ```
 
+## Exit Codes
+
+Hotnote uses exit codes to indicate the result of command execution:
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | General error |
+| 2 | Not found |
+| 3 | Invalid input |
+| 4 | Configuration error |
+
+Example:
+```bash
+./hotnote open nonexistent; echo $?  # Outputs: 2
+```
+
 ## Data Storage
 - Notes are stored as `.md` files in the `notes/` directory by default
 - Each note uses a filename-based slug for its ID

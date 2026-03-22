@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/spf13/cobra"
+	exitorrors "hotnotego/internal/errors"
 	"hotnotego/internal/storage"
 	"hotnotego/internal/workspace"
 )
@@ -19,20 +20,20 @@ var openCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			fmt.Printf("Error creating workspace manager: %v\n", err)
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		store := storage.NewStore(wm)
 		path, err := store.Path(title)
 		if err != nil {
 			fmt.Printf("Error getting note path: %v\n", err)
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		// Check if file exists
 		if _, err := os.Stat(path); os.IsNotExist(err) {
 			fmt.Printf("Error: note '%s' not found\n", title)
-			os.Exit(2) // Not found error code
+			os.Exit(exitorrors.ExitNotFound) // Not found error code
 		}
 
 		// Determine editor to use
@@ -49,7 +50,7 @@ var openCmd = &cobra.Command{
 
 		if err := editorCmd.Run(); err != nil {
 			fmt.Printf("Error opening editor: %v\n", err)
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 	},
 }

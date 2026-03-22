@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/yuin/goldmark"
+	exitorrors "hotnotego/internal/errors"
 	"hotnotego/internal/storage"
 	"hotnotego/internal/workspace"
 )
@@ -29,7 +30,7 @@ var renderCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error creating workspace manager: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		store := storage.NewStore(wm)
@@ -42,7 +43,7 @@ var renderCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error getting note path: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		content, err := os.ReadFile(path)
@@ -54,7 +55,7 @@ var renderCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error reading note: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitNotFound)
 		}
 		var buf bytes.Buffer
 		err = md.Convert(content, &buf)
@@ -66,7 +67,7 @@ var renderCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Error rendering markdown: %v\n", err)
 			}
-			os.Exit(1)
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		if jsonFlag {
@@ -76,7 +77,7 @@ var renderCmd = &cobra.Command{
 				errorResponse := map[string]string{"error": fmt.Sprintf("Error marshaling JSON: %v", err)}
 				jsonError, _ := json.Marshal(errorResponse)
 				fmt.Println(string(jsonError))
-				os.Exit(1)
+				os.Exit(exitorrors.ExitGeneral)
 			} else {
 				fmt.Println(string(jsonData))
 			}
