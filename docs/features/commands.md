@@ -10,6 +10,8 @@ These flags work with all commands:
 |------|-------|---------|-------------|
 | `--data-dir` | `-d` | `notes` | Data directory for notes |
 | `--json` | | `false` | Output in JSON format |
+| `--version` | | `false` | Show version information |
+| `--help` | `-h` | `false` | Show help for any command |
 
 ## Exit Codes
 
@@ -80,6 +82,15 @@ List all notes in the current workspace.
 hotnote list [flags]
 ```
 
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--flat` | Output plain filenames only |
+| `--sort updated` | Sort by last modified time |
+| `--sort created` | Sort by creation time |
+| `--json` | Output in JSON format |
+
 ### Examples
 
 ```bash
@@ -88,6 +99,9 @@ hotnote list
 
 # List in JSON format
 hotnote list --json
+
+# Sort by updated time
+hotnote list --sort updated
 ```
 
 ### Output Format
@@ -271,12 +285,36 @@ hotnote workspace use work
 
 All subsequent `new`, `list`, `open`, and `render` commands will use the selected workspace.
 
-### Workspace Storage
+## hotnote version
 
-| Purpose | Location |
-|---------|----------|
-| Config | `~/.config/hotnote/config.yaml` |
-| Notes | `~/.local/share/hotnote/workspaces/<name>/` |
+Display version information.
+
+### Usage
+
+```bash
+hotnote --version
+```
+
+### Example
+
+```bash
+hotnote --version
+# Output: hotnote version 0.1.0
+```
+
+## hotnote ai
+
+AI-powered note operations (Phase 2 feature, stub implementation).
+
+### Usage
+
+```bash
+hotnote ai <subcommand> [flags]
+```
+
+### Status
+
+This command is currently a stub. Full AI integration is planned for Phase 2.
 
 ## Adding Commands
 

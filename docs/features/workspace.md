@@ -36,12 +36,10 @@ A **workspace** is simply a directory containing markdown notes. You can have mu
 ### Config Structure
 
 ```yaml
-current: default
+current_workspace: default
 workspaces:
-  - name: default
-    path: /home/user/.local/share/hotnote/workspaces/default
-  - name: work
-    path: /home/user/.local/share/hotnote/workspaces/work
+  default: /home/user/.local/share/hotnote/workspaces/default
+  work: /home/user/.local/share/hotnote/workspaces/work
 ```
 
 ### Storage Locations
@@ -68,13 +66,12 @@ Any type implementing `Current()` can be used as a workspace manager.
 ```go
 type Manager struct {
     configPath string  // ~/.config/hotnote/config.yaml
-    dataPath   string  // ~/.local/share/hotnote/workspaces/
-    config     Config
+    config     *Config
 }
 
 type Config struct {
-    Current     string               `yaml:"current"`
-    Workspaces  []WorkspaceConfig   `yaml:"workspaces"`
+    CurrentWorkspace string            `yaml:"current_workspace"`
+    Workspaces       map[string]string `yaml:"workspaces"`
 }
 ```
 
@@ -96,21 +93,19 @@ Creates the default workspace if it doesn't exist:
 
 ```go
 func (m *Manager) Init() error {
-    if m.config.Current != "" {
-        return nil  // Already initialized
+    if m.config.CurrentWorkspace != "" {
+        return ErrWorkspaceAlreadyExists
     }
 
-    // Create default workspace directory
-    defaultPath := filepath.Join(m.dataPath, "default")
+    home, _ := os.UserHomeDir()
+    defaultPath := filepath.Join(home, ".local", "share", "hotnote", "workspaces", "default")
+    
     if err := os.MkdirAll(defaultPath, 0755); err != nil {
-        return fmt.Errorf("init: %w", err)
+        return fmt.Errorf("create workspace directory: %w", err)
     }
 
-    // Save config
-    m.config.Current = "default"
-    m.config.Workspaces = []WorkspaceConfig{
-        {Name: "default", Path: defaultPath},
-    }
+    m.config.CurrentWorkspace = "default"
+    m.config.Workspaces["default"] = defaultPath
     return m.save()
 }
 ```
@@ -120,16 +115,8 @@ func (m *Manager) Init() error {
 Returns all workspaces, marking the current one:
 
 ```go
-func (m *Manager) List() ([]WorkspaceInfo, error) {
-    var workspaces []WorkspaceInfo
-    for _, ws := range m.config.Workspaces {
-        workspaces = append(workspaces, WorkspaceInfo{
-            Name:     ws.Name,
-            Path:     ws.Path,
-            IsCurrent: ws.Name == m.config.Current,
-        })
-    }
-    return workspaces, nil
+func (m *Manager) List() (map[string]string, string, error) {
+    return m.config.Workspaces, m.config.CurrentWorkspace, nil
 }
 ```
 
@@ -139,13 +126,11 @@ Changes the current workspace:
 
 ```go
 func (m *Manager) Use(name string) error {
-    for _, ws := range m.config.Workspaces {
-        if ws.Name == name {
-            m.config.Current = name
-            return m.save()
-        }
+    if _, exists := m.config.Workspaces[name]; !exists {
+        return ErrWorkspaceDoesNotExist
     }
-    return fmt.Errorf("workspace use: %w", ErrWorkspaceDoesNotExist)
+    m.config.CurrentWorkspace = name
+    return m.save()
 }
 ```
 
@@ -155,29 +140,23 @@ Adds a new workspace:
 
 ```go
 func (m *Manager) New(name string, customPath string) error {
-    // Check if exists
-    for _, ws := range m.config.Workspaces {
-        if ws.Name == name {
-            return fmt.Errorf("workspace new: %w", ErrWorkspaceAlreadyExists)
-        }
+    if _, exists := m.config.Workspaces[name]; exists {
+        return ErrWorkspaceAlreadyExists
     }
 
-    // Determine path
-    path := customPath
-    if path == "" {
-        path = filepath.Join(m.dataPath, name)
+    var workspacePath string
+    if customPath == "" {
+        home, _ := os.UserHomeDir()
+        workspacePath = filepath.Join(home, ".local", "share", "hotnote", "workspaces", name)
+    } else {
+        workspacePath = customPath
     }
 
-    // Create directory
-    if err := os.MkdirAll(path, 0755); err != nil {
-        return fmt.Errorf("workspace new: %w", err)
+    if err := os.MkdirAll(workspacePath, 0755); err != nil {
+        return fmt.Errorf("create workspace directory: %w", err)
     }
 
-    // Update config
-    m.config.Workspaces = append(m.config.Workspaces, WorkspaceConfig{
-        Name: name,
-        Path: path,
-    })
+    m.config.Workspaces[name] = workspacePath
     return m.save()
 }
 ```

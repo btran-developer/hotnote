@@ -11,11 +11,16 @@ Welcome to the Hotnote documentation. This is a file-based note-taking CLI appli
 ### Architecture
 - [Overview](architecture/overview.md) - Project structure and component relationships
 - [Data Flow](architecture/data-flow.md) - How data moves through the system
+- [Error Handling](architecture/error-handling.md) - Exit codes and error patterns
 
 ### Features
 - [Commands](features/commands.md) - CLI commands reference
 - [Workspace](features/workspace.md) - Multi-workspace management
 - [Storage](features/storage.md) - File-based storage and YAML frontmatter
+- [Version](features/version.md) - Version information
+
+### Testing
+- [Testing Guide](testing.md) - Running tests and test patterns
 
 ## Overview
 
@@ -25,6 +30,7 @@ Hotnote is a terminal-based note-taking application with these key features:
 - **Multiple workspaces** - Organize notes into separate workspace directories
 - **Editor integration** - Open notes in your preferred `$EDITOR`
 - **Markdown rendering** - Convert notes to HTML
+- **Atomic writes** - Reliable file operations that won't corrupt data
 
 ## Tech Stack
 

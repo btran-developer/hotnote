@@ -11,10 +11,12 @@ hotnote/
 │   ├── new.go                  # Create new note
 │   ├── list.go                 # List notes
 │   ├── open.go                 # Open note in editor
-│   ├── render.go                # Render markdown to HTML
-│   ├── workspace.go             # Workspace management commands
+│   ├── render.go               # Render markdown to HTML
+│   ├── workspace.go            # Workspace management commands
 │   ├── ai.go                   # AI operations (stub)
-│   └── slugify_test.go         # Tests
+│   ├── workspace_test.go       # Workspace CLI tests
+│   ├── exitcodes_test.go       # Exit code tests
+│   └── slugify_test.go        # Slugify tests
 │
 ├── internal/                    # Private packages
 │   ├── core/
@@ -25,12 +27,18 @@ hotnote/
 │   ├── workspace/
 │   │   ├── workspace.go        # Workspace manager
 │   │   └── workspace_test.go   # Workspace tests
+│   ├── errors/
+│   │   └── errors.go           # Exit code constants
+│   ├── fsutil/
+│   │   ├── fsutil.go           # Atomic file operations
+│   │   └── fsutil_test.go      # fsutil tests
 │   ├── ai/                     # AI integration (stub)
 │   ├── markdown/               # Markdown processing (stub)
 │   ├── search/                 # Search functionality (stub)
 │   ├── tui/                    # Terminal UI (stub)
 │   └── cli/                    # CLI utilities (stub)
 │
+├── .ai/                         # Design documents
 ├── docs/                        # Documentation
 ├── go.mod                       # Module definition
 └── README.md
@@ -82,6 +90,7 @@ Uses [Cobra](https://github.com/spf13/cobra) for command-line parsing. Each comm
 | `hotnote open` | `open.go` | Open note in `$EDITOR` |
 | `hotnote render` | `render.go` | Render markdown to HTML |
 | `hotnote workspace` | `workspace.go` | Manage workspaces |
+| `hotnote ai` | `ai.go` | AI operations (stub) |
 
 ### Internal Layer (`internal/`)
 
@@ -123,8 +132,39 @@ Manages multiple note workspaces. Handles configuration persistence.
 ```go
 type Manager struct {
     configPath string  // ~/.config/hotnote/config.yaml
-    dataPath   string  // ~/.local/share/hotnote/workspaces/
+    config     *Config
 }
+
+type Config struct {
+    CurrentWorkspace string            `yaml:"current_workspace"`
+    Workspaces       map[string]string `yaml:"workspaces"`
+}
+```
+
+#### `internal/errors/errors.go`
+
+Defines exit code constants for consistent error handling:
+
+```go
+const (
+    ExitSuccess       = 0
+    ExitGeneral       = 1
+    ExitNotFound      = 2
+    ExitInvalidInput  = 3
+    ExitConfigError   = 4
+)
+```
+
+#### `internal/fsutil/fsutil.go`
+
+Provides atomic file operations for reliable writes:
+
+```go
+// AtomicWrite creates a temp file and renames it to target
+func AtomicWrite(path string, data []byte, perm os.FileMode) error
+
+// AtomicWriteExclusive creates a new file atomically (fails if exists)
+func AtomicWriteExclusive(path string, data []byte, perm os.FileMode) error
 ```
 
 ## Dependencies

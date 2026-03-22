@@ -89,27 +89,22 @@ func (s *Store) Path(id string) (string, error) {
 
 ### Ensure Note Exists
 
-Create a new note file (fails if exists):
+Create a new note file atomically (fails if exists):
 
 ```go
-func (s *Store) Ensure(id string) error {
+func (s *Store) Ensure(id string, content []byte) error {
     path, err := s.Path(id)
     if err != nil {
         return err
     }
-
-    // O_CREATE: Create if not exists
-    // O_EXCL: Fail if file exists
-    // O_WRONLY: Write-only access
-    f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
-    if err != nil {
+    if err := fsutil.AtomicWriteExclusive(path, content, 0644); err != nil {
         return fmt.Errorf("ensure: %w", err)
     }
-    defer f.Close()
-
     return nil
 }
 ```
+
+Uses `fsutil.AtomicWriteExclusive` for atomic file creation with `os.O_EXCL`.
 
 ### Write Frontmatter
 
@@ -120,30 +115,25 @@ func createNote(title string, tags []string) error {
     slug := slugify(title)
     id := uuid.New().String()
 
-    path := filepath.Join(workspacePath, slug+".md")
-    f, err := os.Create(path)
-    if err != nil {
-        return err
-    }
-    defer f.Close()
-
-    // Write YAML frontmatter
-    fmt.Fprintf(f, `---
+    frontmatter := fmt.Sprintf(`---
 id: %s
 title: %s
 created_at: %s
 updated_at: %s
 tags: %v
 ---
+
+# %s
 `,
         id,
         title,
         time.Now().Format(time.RFC3339),
         time.Now().Format(time.RFC3339),
         tags,
+        title,
     )
 
-    return f.Sync()
+    return store.Ensure(slug, []byte(frontmatter))
 }
 ```
 
@@ -220,24 +210,26 @@ func deleteNote(slug string) error {
 The storage layer is tested with table-driven tests:
 
 ```go
-func TestStore_Ensure(t *testing.T) {
-    tests := []struct {
-        name    string
-        slug    string
-        wantErr bool
-    }{
-        {"new note", "test-note", false},
-        {"duplicate", "test-note", true},  // Already exists
-    }
+func TestEnsure_NewFile(t *testing.T) {
+    store := NewStore(mockWM)
 
-    for _, tt := range tests {
-        t.Run(tt.name, func(t *testing.T) {
-            err := store.Ensure(tt.slug)
-            if (err != nil) != tt.wantErr {
-                t.Errorf("Ensure() error = %v, wantErr %v", err, tt.wantErr)
-            }
-        })
-    }
+    err := store.Ensure("new-note", []byte("# Test\n"))
+    require.NoError(t, err)
+
+    // Verify file was created
+    content, _ := os.ReadFile(filepath.Join(workspaceDir, "new-note.md"))
+    assert.Equal(t, "# Test\n", string(content))
+}
+
+func TestEnsure_AlreadyExists(t *testing.T) {
+    store := NewStore(mockWM)
+
+    err := store.Ensure("existing-note", []byte("# First\n"))
+    require.NoError(t, err)
+
+    // Second create should fail
+    err = store.Ensure("existing-note", []byte("# Second\n"))
+    assert.Error(t, err)
 }
 ```
 
