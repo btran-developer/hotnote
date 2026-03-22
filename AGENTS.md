@@ -64,3 +64,37 @@ feat(commands): add delete command
 - Add --force flag
 
 Examples: feat, fix, docs, refactor, test, chore
+
+## Documentation
+
+Documentation must stay accurate with code changes. After modifying code, check for gaps.
+
+### Update Triggers
+
+| Change | Check |
+|--------|-------|
+| Command | `docs/features/commands.md` |
+| Storage | `docs/features/storage.md` |
+| Workspace | `docs/features/workspace.md` |
+| New package | `docs/architecture/overview.md` |
+| Errors | `docs/architecture/error-handling.md` |
+
+### Create New Docs When
+
+- New feature without docs → create `docs/features/<name>.md`
+- New architectural component → add to `docs/architecture/`
+- Significant behavior change → update `.ai/implementation-issues.md`
+
+### Checklist
+
+- [ ] Update existing docs for changed behavior
+- [ ] Create new docs for undocumented features
+- [ ] Update project structure in `docs/architecture/overview.md`
+- [ ] Update links in `docs/index.md`
+- [ ] Sync `.ai/` design docs
+
+### Avoid
+
+- Orphaned docs (feature not implemented)
+- Stale code examples
+- Broken links
