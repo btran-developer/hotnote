@@ -35,8 +35,18 @@
 - No global state
 - sync/atomic for simple counters
 
-## Hotnote Specific
-- UTF-8 markdown
+## Hotnote Specific- UTF-8 markdown
 - UUIDs: github.com/google/uuid
 - Slugs: lowercase, hyphen, ASCII
 - Frontmatter: YAML
+
+## Git Commit Conventions
+- Follow Conventional Commits specification (https://www.conventionalcommits.org/)
+- Commit message format: `<type>[optional scope]: <description>`
+- Types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
+- Examples:
+  - feat: add user authentication  - fix: resolve nil pointer exception in markdown parser
+  - docs: update API documentation for new endpoints
+  - refactor: simplify slug generation logic
+  - test: add unit tests for storage layer
+  - chore: update dependencies
