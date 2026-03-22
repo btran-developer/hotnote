@@ -9,8 +9,9 @@ A terminal-first, markdown-native knowledge system designed for both humans and 
 ## Installation
 1. Clone this repository
 2. Build the application:
-   ```bash   go build -o hotnote ./cmd/hotnote
-   ```
+```bash   
+go build -o hotnote ./cmd/hotnote
+```
 
 ## Usage
 ### Create a new note
@@ -24,7 +25,8 @@ A terminal-first, markdown-native knowledge system designed for both humans and 
 ```
 
 ### Open a note for editing
-```bash./hotnote open "My idea"
+```bash
+./hotnote open "My idea"
 ```
 
 ### Render markdown to HTML
