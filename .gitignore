@@ -25,4 +25,8 @@ go.work
 # macOS
 .DS_Store
 
+# HotNote binary
 hotnote
+
+# Benchmark reports
+.benchmarks/

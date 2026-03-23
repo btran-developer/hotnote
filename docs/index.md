@@ -20,7 +20,7 @@ Welcome to the Hotnote documentation. This is a file-based note-taking CLI appli
 - [Version](features/version.md) - Version information
 
 ### Testing
-- [Testing Guide](testing.md) - Running tests and test patterns
+- [Testing Guide](testing.md) - Running tests, benchmarks, and test patterns
 
 ## Overview
 
