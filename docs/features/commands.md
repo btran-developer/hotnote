@@ -8,11 +8,12 @@ These flags work with all commands:
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
-| `--data-dir` | `-d` | `notes` | Data directory for notes |
 | `--json` | | `false` | Output in JSON format |
 | `--pretty` | | `false` | Pretty-print JSON output (only with --json) |
 | `--version` | | `false` | Show version information |
 | `--help` | `-h` | `false` | Show help for any command |
+
+> **Note:** The `--data-dir` flag was removed in favor of workspace-based organization.
 
 ## Exit Codes
 
@@ -408,7 +409,6 @@ hotnote workspace use work
 **JSON output (`--json`):**
 ```json
 {"message":"Switched to workspace: work"}
-```
 ```
 
 All subsequent `new`, `list`, `open`, and `render` commands will use the selected workspace.

@@ -15,6 +15,7 @@ hotnote/
 │   ├── workspace.go            # Workspace management commands
 │   ├── ai.go                   # AI operations (stub)
 │   ├── workspace_test.go       # Workspace CLI tests
+│   ├── benchmark_test.go       # Performance benchmarks
 │   ├── exitcodes_test.go       # Exit code tests
 │   └── slugify_test.go        # Slugify tests
 │

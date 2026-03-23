@@ -201,3 +201,264 @@ Tests should be deterministic and not depend on:
 - User-specific directories
 
 Each test should set up its own fixtures and clean up after itself.
+
+---
+
+## Benchmarking
+
+HotNote includes benchmarks to ensure operations meet the performance requirement of **<100ms** (PRD §163).
+
+### What Are Benchmarks?
+
+Benchmarks measure the performance of code operations:
+- **Unlike tests**: Tests verify correctness; benchmarks measure speed and memory
+- **Go benchmarks**: Use `testing.B` instead of `testing.T`
+- **Automatic iteration**: Go runs benchmarks multiple times to get statistically significant results
+
+Benchmarked operations:
+- `new` - Creating notes
+- `list` - Listing notes (10, 100, 500 notes)
+- `open` - Opening notes for editing
+- `render` - Converting markdown to HTML
+- `workspace` - Workspace manager operations
+
+### How Benchmarks Work
+
+A benchmark function looks like this:
+
+```go
+func BenchmarkListNotes(b *testing.B) {
+    // Setup (not timed)
+    workspacePath, cleanup := setupTestWorkspace(b, 500)
+    defer cleanup()
+    
+    b.ResetTimer()  // Start timing here
+    
+    for i := 0; i < b.N; i++ {
+        // This loop runs multiple times
+        listNotes(workspacePath)
+    }
+}
+```
+
+**Key concepts:**
+
+| Function | Purpose |
+|----------|---------|
+| `b.N` | Number of iterations Go will run (automatically determined) |
+| `b.ResetTimer()` | Excludes setup time from measurements |
+| `b.StopTimer()` / `b.StartTimer()` | Pause timing for non-benchmark code |
+
+### Running Benchmarks
+
+#### Using the Benchmark Script (Recommended)
+
+```bash
+./scripts/benchmark.sh
+```
+
+This runs all benchmarks, generates a report in `.benchmarks/`, and highlights any operations exceeding the 100ms threshold.
+
+**Profiling with the script:**
+
+```bash
+# Generate CPU profile
+./scripts/benchmark.sh --cpuprofile
+go tool pprof -http=:8080 cpu.prof
+
+# Generate memory profile
+./scripts/benchmark.sh --memprofile
+go tool pprof -http=:8080 mem.prof
+```
+
+The profile files (`cpu.prof` or `mem.prof`) are generated in the project directory after running with profiling flags.
+
+#### Manual Benchmark Runs
+
+```bash
+# Run all benchmarks with memory stats
+go test -bench=. -benchmem ./cmd/
+
+# Run specific benchmark
+go test -bench=BenchmarkListNotes -benchmem ./cmd/
+
+# Run benchmarks matching pattern
+go test -bench=BenchmarkList -benchmem ./cmd/
+
+# Run with CPU profiling
+go test -bench=. -cpuprofile=.benchmarks/cpu.prof ./cmd/
+go tool pprof .benchmarks/cpu.prof
+```
+
+**Common flags:**
+- `-bench=.` - Run all benchmarks (regex match)
+- `-benchmem` - Include memory allocation stats
+- `-count=5` - Run each benchmark 5 times (for statistical significance)
+- `-run=^$` - Skip tests, run only benchmarks
+
+### Interpreting Results
+
+Example benchmark output:
+
+```
+BenchmarkListNotes/notes_500-8    816   1358188 ns/op   328404 B/op   2681 allocs/op
+```
+
+Breaking it down:
+
+| Field | Value | Meaning |
+|-------|-------|---------|
+| Name | `BenchmarkListNotes/notes_500-8` | Benchmark name with subtest and GOMAXPROCS (8) |
+| Iterations | `816` | How many times the loop ran (higher = more reliable) |
+| Time | `1358188 ns/op` | 1.36 milliseconds per operation |
+| Memory | `328404 B/op` | Bytes allocated per operation (~328 KB) |
+| Allocs | `2681 allocs/op` | Heap allocations per operation |
+
+**Status indicators:**
+- ✅ Under 100ms threshold
+- ⚠️ Exceeds 100ms threshold (needs optimization)
+
+### Performance Targets
+
+Per PRD §163, all operations must complete in <100ms on SSD hardware.
+
+| Operation | Target | Typical | Status |
+|-----------|--------|---------|--------|
+| `new` | <100ms | ~5ms | ✅ ~20x faster |
+| `list` (500 notes) | <100ms | ~1ms | ✅ ~100x faster |
+| `open` | <100ms | ~0.002ms | ✅ ~50000x faster |
+| `render` | <100ms | ~0.005ms | ✅ ~20000x faster |
+| `workspace` init | <100ms | ~0.04ms | ✅ ~2500x faster |
+
+### Comparing Benchmarks Over Time
+
+#### Method 1: Simple File Comparison
+
+Save benchmark results and compare with `diff`:
+
+```bash
+# Before changes
+go test -bench=. -benchmem ./cmd/ > .benchmarks/baseline.txt
+
+# ... make code changes ...
+
+# After changes
+go test -bench=. -benchmem ./cmd/ > .benchmarks/current.txt
+
+# Compare
+diff .benchmarks/baseline.txt .benchmarks/current.txt
+```
+
+#### Method 2: Using benchstat (Recommended)
+
+`benchstat` provides statistical analysis of benchmark results:
+
+```bash
+# Install benchstat
+go install golang.org/x/perf/cmd/benchstat@latest
+
+# Run benchmarks multiple times before changes
+go test -bench=. -count=5 ./cmd/ > .benchmarks/old.txt
+
+# ... make code changes ...
+
+# Run benchmarks multiple times after changes
+go test -bench=. -count=5 ./cmd/ > .benchmarks/new.txt
+
+# Compare with statistical significance
+benchstat .benchmarks/old.txt .benchmarks/new.txt
+```
+
+**Sample benchstat output:**
+
+```
+name                    old time/op    new time/op    delta
+BenchmarkListNotes-8    1.36ms ± 3%    1.25ms ± 2%   -8.12%  (p=0.002 n=5+5)
+
+name                    old alloc/op   new alloc/op   delta
+BenchmarkListNotes-8     328kB ± 0%     310kB ± 0%   -5.49%  (p=0.008 n=5+5)
+```
+
+**Understanding the output:**
+- `± 3%` - Variation between runs (lower is more consistent)
+- `-8.12%` - Performance improvement (negative = faster)
+- `(p=0.002)` - P-value < 0.05 means the change is statistically significant
+- `n=5+5` - 5 runs before, 5 runs after
+
+#### Method 3: Benchmark Report History
+
+The benchmark script saves dated reports:
+
+```bash
+# List all reports
+ls -la .benchmarks/
+
+# Compare two specific reports
+diff .benchmarks/report_20260322_120000.txt .benchmarks/report_20260322_180000.txt
+```
+
+### Writing New Benchmarks
+
+To add a benchmark to `cmd/benchmark_test.go`:
+
+```go
+func BenchmarkMyOperation(b *testing.B) {
+    // Setup test data
+    workspacePath, configPath, cleanup := setupBenchmarkWorkspace(b, 100)
+    defer cleanup()
+    
+    // Set up environment
+    restoreConfig := setBenchmarkConfig(b, configPath)
+    defer restoreConfig()
+    
+    b.ResetTimer()  // Start timing
+    
+    for i := 0; i < b.N; i++ {
+        // Code to benchmark
+        err := myOperation(workspacePath)
+        if err != nil {
+            b.Fatalf("operation failed: %v", err)
+        }
+    }
+}
+```
+
+**Best practices:**
+1. Use `setupBenchmarkWorkspace()` to create isolated test data
+2. Use `setBenchmarkConfig()` to configure environment
+3. Call `b.ResetTimer()` after setup
+4. Check for errors inside the loop
+5. Clean up with `defer cleanup()`
+
+### Benchmark Reports
+
+Benchmark reports are saved to `.benchmarks/report_YYYYMMDD_HHMMSS.txt`:
+
+```
+.benchmarks/
+├── report_20260322_120000.txt
+├── report_20260322_180000.txt
+└── cpu.prof  (if profiling enabled)
+```
+
+The `.benchmarks/` directory is gitignored to avoid committing large/temporary files.
+
+### Troubleshooting
+
+**Benchmarks fail with "workspace not initialized"**
+- Ensure `setBenchmarkConfig()` is called before operations
+- Check that config file is created at correct path
+
+**Inconsistent results**
+- Close other applications to reduce system load
+- Run with `-count=5` or higher for statistical significance
+- Check for background processes (indexing, backups)
+
+**High memory usage**
+- Large note counts (500+) will use more memory
+- This is expected; check `allocs/op` for optimization opportunities
+
+**"No benchmarks to run"**
+- Ensure benchmark files end with `_test.go`
+- Benchmark functions must start with `Benchmark`
+- Use `-run=^$` to skip tests that might interfere
