@@ -19,21 +19,43 @@ var openCmd = &cobra.Command{
 		title := args[0]
 		wm, err := workspace.NewManager()
 		if err != nil {
-			fmt.Printf("create workspace manager: %v\n", err)
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+			} else {
+				fmt.Printf("create workspace manager: %v\n", err)
+			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		store := storage.NewStore(wm)
 		path, err := store.Path(title)
 		if err != nil {
-			fmt.Printf("get note path: %v\n", err)
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("get note path: %v", err))
+			} else {
+				fmt.Printf("get note path: %v\n", err)
+			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		// Check if file exists
 		if _, err := os.Stat(path); os.IsNotExist(err) {
-			fmt.Println("note not found")
+			if jsonFlag {
+				outputJSONError("note not found")
+			} else {
+				fmt.Println("note not found")
+			}
 			os.Exit(exitorrors.ExitNotFound)
+		}
+
+		if jsonFlag {
+			response := map[string]string{
+				"status": "opened",
+				"path":   path,
+			}
+			outputJSON(response)
+			// In JSON mode, we don't actually open the editor
+			return
 		}
 
 		// Determine editor to use

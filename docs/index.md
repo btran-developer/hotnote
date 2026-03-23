@@ -29,8 +29,9 @@ Hotnote is a terminal-based note-taking application with these key features:
 - **File-based storage** - Notes stored as markdown files with YAML frontmatter
 - **Multiple workspaces** - Organize notes into separate workspace directories
 - **Editor integration** - Open notes in your preferred `$EDITOR`
-- **Markdown rendering** - Convert notes to HTML
+- **Markdown rendering** - Convert notes to HTML with frontmatter support
 - **Atomic writes** - Reliable file operations that won't corrupt data
+- **Deterministic output** - Consistent, predictable command output
 
 ## Tech Stack
 

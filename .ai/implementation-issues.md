@@ -63,14 +63,27 @@ Based on CLI Spec §191
 - Prevents partial writes if process is interrupted
 - Important for reliability (PRD §164)
 
-### 9. Deterministic Output (Partially Missing)
+### 9. Deterministic Output (Complete)
 Based on PRD §167 and CLI Spec §193
 
-**Issue 9.1: Ensure deterministic output**
-- Make sure command output is consistent and predictable
-- For list command, ensure consistent ordering when no sort specified
-- Format dates/times consistently
-- Ensure JSON output is properly formatted and valid
+**Issue 9.1: Ensure deterministic output** ✅ Complete
+- Make sure command output is consistent and predictable ✅
+- For list command, ensure consistent ordering when no sort specified ✅
+  - Added `--sort` flag with options: `name` (default), `updated`, `created`
+  - Default sorting: alphabetical by slug
+  - `--sort updated`: by modification time (newest first)
+  - `--sort created`: by creation time from filesystem (newest first)
+- Format dates/times consistently ✅
+  - JSON output: `time.RFC3339` (ISO 8601)
+  - Human-readable output: `2006-01-02 15:04` format
+- Ensure JSON output is properly formatted and valid ✅
+  - Added `--pretty` flag for pretty-printed JSON output
+  - Standardized JSON helper functions (`outputJSON`, `outputJSONError`)
+  - Consistent field ordering in all JSON responses
+- Render command improvements ✅
+  - Strips frontmatter by default
+  - Added `--include-frontmatter` flag
+  - Added `--frontmatter-format` option: `table`, `dl`, `pre` (default)
 
 ### 10. Performance Optimization (Ongoing)
 Based on PRD §163

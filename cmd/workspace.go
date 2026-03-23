@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/spf13/cobra"
 	exitorrors "hotnotego/internal/errors"
@@ -24,9 +24,7 @@ var workspaceInitCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
-				jsonError, _ := json.Marshal(errorResponse)
-				fmt.Println(string(jsonError))
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
 			} else {
 				fmt.Printf("create workspace manager: %v\n", err)
 			}
@@ -35,17 +33,13 @@ var workspaceInitCmd = &cobra.Command{
 		if err := wm.Init(); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": "workspace already initialized"}
-					jsonError, _ := json.Marshal(errorResponse)
-					fmt.Println(string(jsonError))
+					outputJSONError("workspace already initialized")
 				} else {
 					fmt.Println("workspace already initialized")
 				}
 			} else {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("init workspace: %v", err)}
-					jsonError, _ := json.Marshal(errorResponse)
-					fmt.Println(string(jsonError))
+					outputJSONError(fmt.Sprintf("init workspace: %v", err))
 				} else {
 					fmt.Printf("init workspace: %v\n", err)
 				}
@@ -54,8 +48,7 @@ var workspaceInitCmd = &cobra.Command{
 		}
 		if jsonFlag {
 			response := map[string]string{"message": "Initialized workspace: default"}
-			jsonOutput, _ := json.Marshal(response)
-			fmt.Println(string(jsonOutput))
+			outputJSON(response)
 		} else {
 			fmt.Println("Initialized workspace: default")
 		}
@@ -69,9 +62,7 @@ var workspaceListCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
-				jsonError, _ := json.Marshal(errorResponse)
-				fmt.Println(string(jsonError))
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
 			} else {
 				fmt.Printf("create workspace manager: %v\n", err)
 			}
@@ -80,17 +71,24 @@ var workspaceListCmd = &cobra.Command{
 		workspaces, current, err := wm.List()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("list workspaces: %v", err)}
-				jsonError, _ := json.Marshal(errorResponse)
-				fmt.Println(string(jsonError))
+				outputJSONError(fmt.Sprintf("list workspaces: %v", err))
 			} else {
 				fmt.Printf("list workspaces: %v\n", err)
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
+		
+		// Get sorted workspace names for deterministic output
+		workspaceNames := make([]string, 0, len(workspaces))
+		for name := range workspaces {
+			workspaceNames = append(workspaceNames, name)
+		}
+		sort.Strings(workspaceNames)
+		
 		if jsonFlag {
 			var wsList []map[string]interface{}
-			for name, path := range workspaces {
+			for _, name := range workspaceNames {
+				path := workspaces[name]
 				ws := map[string]interface{}{
 					"name": name,
 					"path": path,
@@ -102,11 +100,13 @@ var workspaceListCmd = &cobra.Command{
 				}
 				wsList = append(wsList, ws)
 			}
-			jsonOutput, _ := json.Marshal(wsList)
-			fmt.Println(string(jsonOutput))
+			if err := outputJSON(wsList); err != nil {
+				outputJSONError(fmt.Sprintf("marshal JSON: %v", err))
+			}
 		} else {
 			fmt.Printf("Found %d workspaces\n", len(workspaces))
-			for name, path := range workspaces {
+			for _, name := range workspaceNames {
+				path := workspaces[name]
 				if name == current {
 					fmt.Printf("* %s\t%s\n", name, path)
 				} else {
@@ -126,9 +126,7 @@ var workspaceUseCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
-				jsonError, _ := json.Marshal(errorResponse)
-				fmt.Println(string(jsonError))
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
 			} else {
 				fmt.Printf("create workspace manager: %v\n", err)
 			}
@@ -137,18 +135,14 @@ var workspaceUseCmd = &cobra.Command{
 		if err := wm.Use(name); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceDoesNotExist) {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": "workspace not found"}
-					jsonError, _ := json.Marshal(errorResponse)
-					fmt.Println(string(jsonError))
+					outputJSONError("workspace not found")
 				} else {
 					fmt.Println("workspace not found")
 				}
 				os.Exit(exitorrors.ExitNotFound)
 			} else {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("use workspace: %v", err)}
-					jsonError, _ := json.Marshal(errorResponse)
-					fmt.Println(string(jsonError))
+					outputJSONError(fmt.Sprintf("use workspace: %v", err))
 				} else {
 					fmt.Printf("use workspace: %v\n", err)
 				}
@@ -157,8 +151,7 @@ var workspaceUseCmd = &cobra.Command{
 		}
 		if jsonFlag {
 			response := map[string]string{"message": fmt.Sprintf("Switched to workspace: %s", name)}
-			jsonOutput, _ := json.Marshal(response)
-			fmt.Println(string(jsonOutput))
+			outputJSON(response)
 		} else {
 			fmt.Printf("Switched to workspace: %s\n", name)
 		}
@@ -171,9 +164,7 @@ var workspaceNewCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": "workspace name required"}
-				jsonError, _ := json.Marshal(errorResponse)
-				fmt.Println(string(jsonError))
+				outputJSONError("workspace name required")
 			} else {
 				fmt.Println("workspace name required")
 			}
@@ -189,9 +180,7 @@ var workspaceNewCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				errorResponse := map[string]string{"error": fmt.Sprintf("create workspace manager: %v", err)}
-				jsonError, _ := json.Marshal(errorResponse)
-				fmt.Println(string(jsonError))
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
 			} else {
 				fmt.Printf("create workspace manager: %v\n", err)
 			}
@@ -200,17 +189,13 @@ var workspaceNewCmd = &cobra.Command{
 		if err := wm.New(name, path); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": "workspace already exists"}
-					jsonError, _ := json.Marshal(errorResponse)
-					fmt.Println(string(jsonError))
+					outputJSONError("workspace already exists")
 				} else {
 					fmt.Println("workspace already exists")
 				}
 			} else {
 				if jsonFlag {
-					errorResponse := map[string]string{"error": fmt.Sprintf("create workspace: %v", err)}
-					jsonError, _ := json.Marshal(errorResponse)
-					fmt.Println(string(jsonError))
+					outputJSONError(fmt.Sprintf("create workspace: %v", err))
 				} else {
 					fmt.Printf("create workspace: %v\n", err)
 				}
@@ -219,8 +204,7 @@ var workspaceNewCmd = &cobra.Command{
 		}
 		if jsonFlag {
 			response := map[string]string{"message": fmt.Sprintf("Created workspace: %s", name)}
-			jsonOutput, _ := json.Marshal(response)
-			fmt.Println(string(jsonOutput))
+			outputJSON(response)
 		} else {
 			fmt.Printf("Created workspace: %s\n", name)
 		}

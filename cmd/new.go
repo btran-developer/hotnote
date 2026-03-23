@@ -23,7 +23,11 @@ var newCmd = &cobra.Command{
 		id := slugify(title)
 		wm, err := workspace.NewManager()
 		if err != nil {
-			fmt.Printf("create workspace manager: %v\n", err)
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+			} else {
+				fmt.Printf("create workspace manager: %v\n", err)
+			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 		store := storage.NewStore(wm)
@@ -35,14 +39,36 @@ var newCmd = &cobra.Command{
 
 		if err := store.Ensure(id, []byte(frontmatter)); err != nil {
 			if errors.Is(err, os.ErrExist) {
-				fmt.Println("note already exists")
+				if jsonFlag {
+					outputJSONError("note already exists")
+				} else {
+					fmt.Println("note already exists")
+				}
 			} else {
-				fmt.Printf("create note: %v\n", err)
+				if jsonFlag {
+					outputJSONError(fmt.Sprintf("create note: %v", err))
+				} else {
+					fmt.Printf("create note: %v\n", err)
+				}
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
-		fmt.Printf("Created note: %s\n", id)
+		if jsonFlag {
+			path, err := store.Path(id)
+			if err != nil {
+				outputJSONError(fmt.Sprintf("get note path: %v", err))
+				os.Exit(exitorrors.ExitGeneral)
+			}
+			response := map[string]string{
+				"status": "created",
+				"slug":   id,
+				"path":   path,
+			}
+			outputJSON(response)
+		} else {
+			fmt.Printf("Created note: %s\n", id)
+		}
 	},
 }
 

@@ -10,6 +10,7 @@ These flags work with all commands:
 |------|-------|---------|-------------|
 | `--data-dir` | `-d` | `notes` | Data directory for notes |
 | `--json` | | `false` | Output in JSON format |
+| `--pretty` | | `false` | Pretty-print JSON output (only with --json) |
 | `--version` | | `false` | Show version information |
 | `--help` | `-h` | `false` | Show help for any command |
 
@@ -51,6 +52,27 @@ hotnote new "My Research"
 hotnote new "Q3 2024 Goals!"
 ```
 
+### Output Formats
+
+**Plain text:**
+```
+Created note: my-research
+```
+
+**JSON (`--json`):**
+```json
+{"status":"created","slug":"my-research","path":"/Users/user/.local/share/hotnote/workspaces/default/my-research.md"}
+```
+
+**Pretty-printed JSON (`--json --pretty`):**
+```json
+{
+  "status": "created",
+  "slug": "my-research",
+  "path": "/Users/user/.local/share/hotnote/workspaces/default/my-research.md"
+}
+```
+
 ### How It Works
 
 1. Converts title to slug (URL-safe string)
@@ -86,36 +108,54 @@ hotnote list [flags]
 
 | Flag | Description |
 |------|-------------|
-| `--flat` | Output plain filenames only |
-| `--sort updated` | Sort by last modified time |
-| `--sort created` | Sort by creation time |
+| `--sort name` | Sort alphabetically by slug (default) |
+| `--sort updated` | Sort by last modified time (newest first) |
+| `--sort created` | Sort by creation time (newest first) |
 | `--json` | Output in JSON format |
+| `--pretty` | Pretty-print JSON output |
 
 ### Examples
 
 ```bash
-# List all notes
+# List all notes (sorted alphabetically by slug)
 hotnote list
 
 # List in JSON format
 hotnote list --json
 
-# Sort by updated time
+# Sort by updated time (newest first)
 hotnote list --sort updated
+
+# Sort by creation time (newest first)
+hotnote list --sort created
+
+# Pretty-printed JSON output
+hotnote list --json --pretty
 ```
 
 ### Output Format
 
 **Plain text:**
 ```
-note1.md
-note2.md
-project-ideas.md
+test-note	2026-01-15 10:30
+my-research	2026-01-14 09:00
+project-ideas	2026-01-13 15:45
 ```
 
 **JSON (`--json`):**
 ```json
-["note1.md", "note2.md", "project-ideas.md"]
+[{"slug":"test-note","path":"/Users/user/.local/share/hotnote/workspaces/default/test-note.md","updated_at":"2026-01-15T10:30:00Z"}]
+```
+
+**Pretty-printed JSON (`--json --pretty`):**
+```json
+[
+  {
+    "slug": "test-note",
+    "path": "/Users/user/.local/share/hotnote/workspaces/default/test-note.md",
+    "updated_at": "2026-01-15T10:30:00Z"
+  }
+]
 ```
 
 ### Notes
@@ -148,6 +188,15 @@ hotnote open "My Research"
 
 # Open note by slug
 hotnote open my-research
+```
+
+### Output Formats
+
+**Plain text:** Opens in `$EDITOR`
+
+**JSON (`--json`):**
+```json
+{"status":"opened","path":"/Users/user/.local/share/hotnote/workspaces/default/my-research.md"}
 ```
 
 ### How It Works
@@ -186,14 +235,70 @@ hotnote render [title] [flags]
 |----------|-------------|
 | `title` | Title or slug of the note |
 
+### Flags
+
+| Flag | Description | Required |
+|------|-------------|----------|
+| `--frontmatter-format` | Format for frontmatter: `table`, `dl`, or `pre` | When frontmatter desired |
+| `--json` | Output in JSON format | No |
+| `--pretty` | Pretty-print JSON output | No |
+
 ### Examples
 
 ```bash
-# Render to HTML
+# Render to HTML (strips frontmatter by default)
 hotnote render "My Research"
+
+# Include frontmatter as preformatted YAML
+hotnote render "My Research" --frontmatter-format pre
+
+# Include frontmatter as HTML table
+hotnote render "My Research" --frontmatter-format table
+
+# Include frontmatter as definition list
+hotnote render "My Research" --frontmatter-format dl
+
+# Output as JSON
+hotnote render "My Research" --json
 
 # Pipe to file
 hotnote render "My Research" > output.html
+```
+
+### Frontmatter Formats
+
+When `--frontmatter-format` is specified with a value, the frontmatter is rendered in that format:
+
+**pre:**
+```html
+<pre><code class="language-yaml">id: abc123
+title: My Research
+created_at: 2026-01-15 10:30:00 +0000 UTC
+tags: []
+</code></pre>
+```
+
+**table:**
+```html
+<table class="frontmatter">
+  <thead>
+    <tr><th>Key</th><th>Value</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>id</td><td>abc123</td></tr>
+    <tr><td>title</td><td>My Research</td></tr>
+  </tbody>
+</table>
+```
+
+**dl:**
+```html
+<dl class="frontmatter">
+  <dt>id</dt>
+  <dd>abc123</dd>
+  <dt>title</dt>
+  <dd>My Research</dd>
+</dl>
 ```
 
 ### Supported Markdown
@@ -231,6 +336,11 @@ Initialize the default workspace.
 hotnote workspace init
 ```
 
+**JSON output (`--json`):**
+```json
+{"message":"Initialized workspace: default"}
+```
+
 Creates:
 - `~/.config/hotnote/config.yaml`
 - `~/.local/share/hotnote/workspaces/default/`
@@ -245,8 +355,15 @@ hotnote workspace list
 
 Output:
 ```
-default  *
-work     *
+Found 2 workspaces
+default	/Users/user/.local/share/hotnote/workspaces/default
+work	/Users/user/.local/share/hotnote/workspaces/work
+*
+```
+
+**JSON output (`--json`):**
+```json
+[{"name":"default","path":"/Users/user/.local/share/hotnote/workspaces/default","current":true},{"name":"work","path":"/Users/user/.local/share/hotnote/workspaces/work","current":false}]
 ```
 
 Current workspace marked with `*`.
@@ -271,6 +388,11 @@ hotnote workspace new work
 hotnote workspace new archive --path /mnt/notes/archive
 ```
 
+**JSON output (`--json`):**
+```json
+{"message":"Created workspace: work"}
+```
+
 #### use
 
 Switch to a different workspace.
@@ -281,6 +403,12 @@ hotnote workspace use <name>
 
 ```bash
 hotnote workspace use work
+```
+
+**JSON output (`--json`):**
+```json
+{"message":"Switched to workspace: work"}
+```
 ```
 
 All subsequent `new`, `list`, `open`, and `render` commands will use the selected workspace.

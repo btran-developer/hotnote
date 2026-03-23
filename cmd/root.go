@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -17,6 +18,7 @@ var RootCmd = &cobra.Command{
 
 var dataDir string
 var jsonFlag bool
+var prettyFlag bool
 
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
@@ -25,10 +27,36 @@ func Execute() {
 	}
 }
 
+// outputJSON outputs data as JSON, using pretty formatting if prettyFlag is true
+func outputJSON(v interface{}) error {
+	var data []byte
+	var err error
+	
+	if prettyFlag {
+		data, err = json.MarshalIndent(v, "", "  ")
+	} else {
+		data, err = json.Marshal(v)
+	}
+	
+	if err != nil {
+		return err
+	}
+	
+	fmt.Println(string(data))
+	return nil
+}
+
+// outputJSONError outputs an error as JSON, using pretty formatting if prettyFlag is true
+func outputJSONError(errMsg string) {
+	errorResponse := map[string]string{"error": errMsg}
+	outputJSON(errorResponse)
+}
+
 func init() {
 	// Global flags
 	RootCmd.PersistentFlags().StringVarP(&dataDir, "data-dir", "d", "notes", "Data directory for notes")
 	RootCmd.PersistentFlags().BoolVar(&jsonFlag, "json", false, "Output in JSON format")
+	RootCmd.PersistentFlags().BoolVar(&prettyFlag, "pretty", false, "Pretty-print JSON output (only with --json)")
 
 	// Set the run function for the root command (when no subcommand is given)
 	RootCmd.Run = func(cmd *cobra.Command, args []string) {
