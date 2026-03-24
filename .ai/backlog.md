@@ -5,30 +5,70 @@
 
 ## TUI (Phase 2)
 
-### Part 1: Navigation + Preview
-- [ ] Workspace selection on launch (overlay with list)
-- [ ] 2-pane layout (tree 25%, preview 75%)
-- [ ] TreeView (tview) showing folders + files
-- [ ] Virtual scrolling (lazy load on scroll)
-- [ ] Pane toggles (Ctrl+T tree, Ctrl+N list)
-- [ ] Raw/rendered toggle (Ctrl+R)
-- [ ] Help overlay (?) with k/j scroll, Escape close
-- [ ] Status bar (bottom, context-sensitive hints)
-- [ ] Escape = universal cancel
+### Issue 1: TUI Project Setup
+- [ ] Add dependencies (tview, tcell, goldmark, chroma)
+- [ ] Create entry point with tview Application
+- [ ] Set up basic app struct
 
-### Part 2: Editor + Syntax Highlighting
-- [ ] In-TUI editing (Ctrl+E toggle)
-- [ ] External editor (e) with TUI fallback if no $EDITOR
-- [ ] Syntax highlighting in preview (monokai theme, chroma library)
+### Issue 2: Workspace Selection
+- [ ] Add "tui" command to CLI
+- [ ] Create workspace selection overlay
+- [ ] Handle no-workspace case (auto-create default)
+- [ ] Transition to main view
+
+### Issue 3: 2-Pane Layout + TreeView
+- [ ] Create Flex layout (25% tree, 75% preview)
+- [ ] Implement TreeView with folders + files
+- [ ] Load directory structure from workspace
+- [ ] Expand/collapse functionality
+
+### Issue 4: Preview Pane
+- [ ] Create TextView component
+- [ ] Display markdown content on file selection
+- [ ] Scroll support for long notes
+
+### Issue 5: Raw/Rendered Toggle
+- [ ] Integrate goldmark for markdown rendering
+- [ ] Implement Ctrl+R toggle
+- [ ] Apply markdown styling (headings, lists, etc.)
+
+### Issue 6: Status Bar + Help Overlay
+- [ ] Context-sensitive key hints in status bar
+- [ ] Help overlay on ? key
+- [ ] Scrollable help (k/j)
+- [ ] Escape as universal cancel
+
+### Issue 7: Editor Mode
+- [ ] TextArea component for editing
+- [ ] Cursor movement (char + line)
+- [ ] Text insertion/deletion
 - [ ] Save (Ctrl+S), discard (Escape), save+quit (Ctrl+Q)
-- [ ] Unsaved changes prompt on quit
 
-### Part 3: Note/Folder Management
-- [ ] Create note (n) → $EDITOR or TUI fallback
-- [ ] Create folder (Shift+N) → prompt for name
-- [ ] Delete note (d) → confirmation prompt (y/n/c)
-- [ ] Rename note (Ctrl+M) → prompt for new title
-- [ ] Manual refresh (Ctrl+G) → reload all
+### Issue 8: External Editor
+- [ ] 'e' key to open in $EDITOR
+- [ ] TUI fallback if $EDITOR not set
+- [ ] Reload note after return
+
+### Issue 9: Syntax Highlighting
+- [ ] Integrate chroma library
+- [ ] Apply to code blocks in preview
+- [ ] Use monokai theme
+
+### Issue 10: Create + Delete Note
+- [ ] 'n' key to create new note
+- [ ] 'd' key to delete with confirmation (y/n/c)
+- [ ] Handle file operations
+
+### Issue 11: Create Folder + Rename
+- [ ] Shift+N to create new folder
+- [ ] Prompt for folder name
+- [ ] Ctrl+M to rename note
+- [ ] Handle slug collision
+
+### Issue 12: Refresh + Polish
+- [ ] Ctrl+G to manual refresh
+- [ ] Edge case handling
+- [ ] Final testing
 
 ## Future
 - Tabs (multiple notes open simultaneously)
