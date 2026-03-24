@@ -50,6 +50,44 @@
 - Slugs: lowercase, hyphen, ASCII
 - Frontmatter: YAML
 
+## Architecture
+
+### Package Structure
+```
+cmd/              # CLI entry points (Cobra commands)
+internal/tui/    # TUI application (tview)
+internal/<name>/ # Shared packages (storage, workspace, core, etc.)
+docs/            # User-facing documentation
+.ai/             # Design docs and planning (for agents)
+```
+
+### Package Guidelines
+- New shared logic goes in `internal/<name>/` first
+- CLI and TUI both import from `internal/` packages
+- Avoid circular dependencies between packages
+- Use interfaces in `internal/` for testability
+
+### Separation of Concerns
+- CLI (`cmd/`) only handles command parsing and output formatting
+- TUI (`internal/tui/`) handles presentation and user interaction
+- Business logic lives in `internal/` packages
+- Reuse business logic across interfaces, don't duplicate
+
+### Configuration
+- CLI flags for command-specific options
+- Config file (`~/.config/hotnote/config.yaml`) for persistent settings
+- Environment variables as override (e.g., $HOTNOTE_DATA_DIR)
+
+### Dependency Philosophy
+- Prefer Go standard library
+- Add external dependencies only when necessary (e.g., tview, cobra, goldmark)
+- Document why each dependency is needed in go.mod comment if non-obvious
+
+### Interface Usage
+- Define interfaces in `internal/` packages for testability
+- Use concrete types in `cmd/` and `internal/tui/`
+- Example: storage.Store interface → CLI and TUI both use it
+
 ## Git Commit Conventions
 - Follow Conventional Commits (conventionalcommits.org)
 - Format: `<type>(<scope>): <description>`
