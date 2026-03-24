@@ -6,9 +6,9 @@
 ## TUI (Phase 2)
 
 ### Issue 1: TUI Project Setup
-- [ ] Add dependencies (tview, tcell, goldmark, chroma)
-- [ ] Create entry point with tview Application
-- [ ] Set up basic app struct
+- [x] Add dependencies (tview, tcell, goldmark, chroma)
+- [x] Create entry point with tview Application
+- [x] Set up basic app struct
 
 ### Issue 2: Workspace Selection
 - [ ] Add "tui" command to CLI
