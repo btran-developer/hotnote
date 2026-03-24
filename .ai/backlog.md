@@ -1,6 +1,11 @@
 # Backlog — HotNote
 
-## Phase 2 - Part 1: Navigation + Preview
+## CLI (Phase 1)
+- [x] All items completed
+
+## TUI (Phase 2)
+
+### Part 1: Navigation + Preview
 - [ ] Workspace selection on launch (overlay with list)
 - [ ] 2-pane layout (tree 25%, preview 75%)
 - [ ] TreeView (tview) showing folders + files
@@ -11,21 +16,21 @@
 - [ ] Status bar (bottom, context-sensitive hints)
 - [ ] Escape = universal cancel
 
-## Phase 2 - Part 2: Editor + Syntax Highlighting
+### Part 2: Editor + Syntax Highlighting
 - [ ] In-TUI editing (Ctrl+E toggle)
 - [ ] External editor (e) with TUI fallback if no $EDITOR
 - [ ] Syntax highlighting in preview (monokai theme, chroma library)
 - [ ] Save (Ctrl+S), discard (Escape), save+quit (Ctrl+Q)
 - [ ] Unsaved changes prompt on quit
 
-## Phase 2 - Part 3: Note/Folder Management
+### Part 3: Note/Folder Management
 - [ ] Create note (n) → $EDITOR or TUI fallback
 - [ ] Create folder (Shift+N) → prompt for name
 - [ ] Delete note (d) → confirmation prompt (y/n/c)
 - [ ] Rename note (Ctrl+M) → prompt for new title
 - [ ] Manual refresh (Ctrl+G) → reload all
 
-## Future (No Phase)
+## Future
 - Tabs (multiple notes open simultaneously)
 - Dual-view editor (edit + preview side-by-side or toggle)
 - Syntax highlighting in editor
