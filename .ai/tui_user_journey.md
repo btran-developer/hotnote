@@ -46,5 +46,5 @@
 - Escape = close help
 
 ## Journey 8: Quit
-- q (not in edit mode) = exit to shell
-- q (in edit mode with unsaved) = prompt "Save changes? (y/n/c)"
+- Ctrl+Q (not in edit mode) = exit to shell
+- Ctrl+Q (in edit mode with unsaved) = prompt "Save changes? (y/n/c)"

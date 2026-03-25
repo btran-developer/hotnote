@@ -184,7 +184,7 @@ Using chroma library (based on highlight.go):
 | Ctrl+S | Save (edit mode) |
 | Escape | Cancel / Discard edits |
 | Ctrl+Q | Save and quit edit mode |
-| q / Ctrl+C | Quit TUI |
+| Ctrl+Q / Ctrl+C | Quit TUI |
 | ? | Show help |
 
 ### 5.6 Startup Behavior

@@ -11,10 +11,11 @@
 - [x] Set up basic app struct
 
 ### Issue 2: Workspace Selection
-- [ ] Add "tui" command to CLI
-- [ ] Create workspace selection overlay
-- [ ] Handle no-workspace case (auto-create default)
-- [ ] Transition to main view
+- [x] Add "tui" command to CLI
+- [x] Create workspace selection overlay
+- [x] Handle no-workspace case (auto-create default)
+- [x] Handle corrupted config (re-init, show error if fails)
+- [x] Transition to main view
 
 ### Issue 3: 2-Pane Layout + TreeView
 - [ ] Create Flex layout (25% tree, 75% preview)

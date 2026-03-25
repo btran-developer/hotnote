@@ -36,7 +36,7 @@ hotnote tui
 ```
 - Arrow keys (k/j) to navigate
 - Enter to select
-- Escape to cancel (closes TUI)
+- Escape to cancel (selects default workspace)
 - Show current active workspace marked with `>`
 
 ---
@@ -257,7 +257,7 @@ hotnote tui
 |-----|--------|-------------------|
 | ? | Help (scrollable overlay) | No |
 | Escape | Universal cancel | No |
-| q | Quit app | Yes |
+| Ctrl+Q | Quit app | Yes |
 
 ### Tree (Left Pane)
 | Key | Action | Disabled in Edit? |
@@ -348,12 +348,12 @@ type App struct {
 ## 13. Exit
 
 ### Quit Keys
-- q: Quit if not in edit mode
+- Ctrl+Q: Quit if not in edit mode
 - Ctrl+C: Always quit (force)
 
 ### Unsaved Changes
 - If edit mode with unsaved changes:
-  - q: Prompt "Save changes? (y/n/c)" 
+  - Ctrl+Q: Prompt "Save changes? (y/n/c)" 
     - y: Save and quit
     - n: Discard and quit
     - c: Cancel (stay in edit mode)

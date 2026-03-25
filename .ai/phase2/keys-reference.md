@@ -5,7 +5,7 @@
 |-----|--------|-------------------|
 | ? | Help (scrollable overlay) | No |
 | Escape | Universal cancel | No |
-| q | Quit app | Yes |
+| Ctrl+Q | Quit app | Yes |
 
 ## Tree (Left Pane)
 | Key | Action | Disabled in Edit? |
