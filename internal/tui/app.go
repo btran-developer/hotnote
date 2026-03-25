@@ -38,6 +38,8 @@ func New() (*App, error) {
 		showRaw:      false,
 	}
 
+	Apply()
+
 	if err := app.initWorkspace(); err != nil {
 		return nil, fmt.Errorf("init workspace: %w", err)
 	}
@@ -105,7 +107,6 @@ func (a *App) onWorkspaceSelectorCancel() {
 }
 
 func (a *App) setupUI() error {
-	a.setupStyles()
 	a.createMainView()
 
 	createPane := a.createWorkspaceInputPane()
@@ -117,13 +118,6 @@ func (a *App) setupUI() error {
 	a.setupGlobalInputCapture()
 
 	return nil
-}
-
-func (a *App) setupStyles() {
-	tview.Styles.PrimitiveBackgroundColor = tcell.ColorDefault
-	tview.Styles.ContrastBackgroundColor = tcell.ColorDefault
-	tview.Styles.PrimaryTextColor = tcell.ColorDefault
-	tview.Styles.SecondaryTextColor = tcell.ColorDefault
 }
 
 func (a *App) createMainView() {
@@ -140,10 +134,11 @@ func (a *App) createMainView() {
 }
 
 func (a *App) createWorkspaceInputPane() *tview.Flex {
-	a.workspaceInput = NewStackedFormInput("Name:", "new workspace name...").
+	a.workspaceInput = NewStackedFormInput(LabelName, "").
 		SetFieldWidth(30).
 		SetBorder(true).
-		SetErrorColor(tcell.ColorRed)
+		SetLabelColor(DefaultPalette.Accent).
+		SetErrorColor(DefaultPalette.Error)
 
 	horizontalCenter := tview.NewFlex().
 		SetDirection(tview.FlexColumn).
@@ -157,7 +152,7 @@ func (a *App) createWorkspaceInputPane() *tview.Flex {
 		AddItem(horizontalCenter, 0, 1, false).
 		AddItem(nil, 0, 1, false)
 
-	createPane.SetBorder(true).SetTitle(" New Workspace ")
+	createPane.SetBorder(true).SetTitle(TitleNewWorkspace)
 
 	createPane.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEscape {
@@ -209,7 +204,7 @@ func (a *App) updateWorkspaceList(current string) {
 		a.onWorkspaceSelected,
 		a.onWorkspaceSelectorCancel,
 	)
-	a.workspaceSelector.SetBorder(true).SetTitle(" Workspaces ")
+	a.workspaceSelector.SetBorder(true).SetTitle(TitleWorkspaces)
 }
 
 func (a *App) createMainLayout(createPane *tview.Flex) *tview.Flex {

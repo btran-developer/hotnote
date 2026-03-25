@@ -46,10 +46,10 @@ func sortWorkspaces(workspaces map[string]string, current string) []workspaceEnt
 		if entries[j].name == current {
 			return false
 		}
-		if entries[i].name == "default" {
+		if entries[i].name == DefaultWorkspaceName {
 			return true
 		}
-		if entries[j].name == "default" {
+		if entries[j].name == DefaultWorkspaceName {
 			return false
 		}
 		return entries[i].modTime.After(entries[j].modTime)
@@ -78,8 +78,10 @@ func NewWorkspaceSelector(
 	w.SetInputCapture(w.handleInputCapture)
 
 	w.SetBorder(true).
-		SetTitle(" Select Workspace ").
+		SetTitle(TitleWorkspaces).
 		SetBackgroundColor(tcell.ColorDefault)
+	w.SetSecondaryTextStyle(tcell.StyleDefault.Foreground(DefaultPalette.Dim))
+	w.SetSelectedBackgroundColor(DefaultPalette.Primary)
 
 	return w
 }
@@ -89,11 +91,11 @@ func (w *WorkspaceSelector) buildList() {
 
 	first := true
 	for _, entry := range w.workspaces {
-		prefix := "  "
+		prefix := PrefixUnselected
 		if entry.name == w.current {
-			prefix = " >"
+			prefix = PrefixSelected
 		} else if first && w.current == "" {
-			prefix = " >"
+			prefix = PrefixSelected
 		}
 
 		display := fmt.Sprintf("%s %s", prefix, entry.name)
