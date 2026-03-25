@@ -18,10 +18,10 @@
 - [x] Transition to main view
 
 ### Issue 3: 2-Pane Layout + TreeView
-- [ ] Create Flex layout (25% tree, 75% preview)
-- [ ] Implement TreeView with folders + files
-- [ ] Load directory structure from workspace
-- [ ] Expand/collapse functionality
+- [x] Create Flex layout (25% tree, 75% preview)
+- [x] Implement TreeView with folders + files
+- [x] Load directory structure from workspace
+- [x] Expand/collapse functionality
 
 ### Issue 4: Preview Pane
 - [ ] Create TextView component

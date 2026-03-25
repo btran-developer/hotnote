@@ -6,6 +6,7 @@
 | ? | Help (scrollable overlay) | No |
 | Escape | Universal cancel | No |
 | Ctrl+Q | Quit app | Yes |
+| Tab | Switch focus (pane cycling) | No |
 
 ## Tree (Left Pane)
 | Key | Action | Disabled in Edit? |
@@ -13,7 +14,7 @@
 | k / ↑ | Move up | Yes |
 | j / ↓ | Move down | Yes |
 | Enter | Expand (folder) / Open (file) | Yes |
-| l | Move to preview | Yes |
+| Tab | Switch to preview pane | Yes |
 | ? | Help | No |
 
 ## Preview Pane (Read Mode)
@@ -21,7 +22,7 @@
 |-----|--------|-------------------|
 | k / ↑ | Scroll up | N/A (not edit mode) |
 | j / ↓ | Scroll down | N/A |
-| h | Move to tree | N/A |
+| Tab | Switch to tree pane | N/A |
 | e | Open in $EDITOR | N/A |
 | n | New note | N/A |
 | Shift+N | New folder | N/A |

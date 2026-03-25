@@ -8,6 +8,14 @@
 - Interfaces: -er suffix (Reader, Writer)
 - MixedCaps; exported: uppercase first letter
 
+## Constants & Palette
+- Prefer constants over magic strings/numbers
+- Use typed constants (e.g., `type ViewMode string`) for enum-like values
+- Group related constants in a `const` block
+- Document allowed values when not self-explanatory
+- Use `DefaultPalette` colors instead of inline color tags (e.g., `SetTextColor(palette.Red)` not `[red]`)
+- Avoid inline tview color tags like `[red]`, `[blue]` — prefer `SetTextColor()` with palette
+
 ## Imports
 - std, 3rd-party, local groups; blank between; alphabetical within
 

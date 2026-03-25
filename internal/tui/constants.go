@@ -1,5 +1,12 @@
 package tui
 
+type ViewMode string
+
+const (
+	ViewModeWorkspace ViewMode = "workspace"
+	ViewModeMain      ViewMode = "main"
+)
+
 const (
 	LabelName         = "Name:"
 	TitleNewWorkspace = " New Workspace "
@@ -9,4 +16,8 @@ const (
 
 	PrefixSelected   = " >"
 	PrefixUnselected = "  "
+
+	TreePrefixFolderClosed = "[+]"
+	TreePrefixFolderOpen   = "[-]"
+	TreePrefixFile         = "*"
 )
