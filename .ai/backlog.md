@@ -46,12 +46,12 @@
 
 ### Issue G: delete Command
 - [x] Add `Delete(id string) error` to `storage.Store`
-- [ ] Create `cmd/delete.go`
-- [ ] `hotnote delete <slug>` deletes note
-- [ ] Hybrid path resolution support
-- [ ] Confirmation prompt by default
-- [ ] `--force` flag to skip prompt
-- [ ] JSON output support
+- [x] Create `cmd/delete.go`
+- [x] `hotnote delete <slug>` deletes note
+- [x] Hybrid path resolution support
+- [x] Confirmation prompt by default
+- [x] `--force` flag to skip prompt
+- [x] JSON output support
 
 ### Issue H: workspace delete Command
 - [ ] Add `workspaceDeleteCmd` to `cmd/workspace.go`
