@@ -5,10 +5,18 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+)
+
+var (
+	binaryPath     string
+	binaryBuildErr error
+	buildOnce      sync.Once
 )
 
 func getBinaryPath(t *testing.T) string {
@@ -22,29 +30,44 @@ func getBinaryPath(t *testing.T) string {
 		projectRoot = filepath.Dir(wd)
 	}
 
-	binaryPath := filepath.Join(projectRoot, "hotnote")
-	if _, err := os.Stat(binaryPath); err == nil {
-		return binaryPath
-	}
+	buildOnce.Do(func() {
+		binaryDir, err := os.MkdirTemp("", "hotnote-test-binary-*")
+		if err != nil {
+			binaryBuildErr = err
+			return
+		}
 
-	binaryDir, err := os.MkdirTemp("", "hotnote-test-binary-*")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() {
-		os.RemoveAll(binaryDir)
+		binaryPath = filepath.Join(binaryDir, "hotnote")
+		cmd := exec.Command("go", "build", "-o", binaryPath, "./cmd/hotnote")
+		cmd.Dir = projectRoot
+
+		env := os.Environ()
+		hasHome := false
+		for _, e := range env {
+			if strings.HasPrefix(e, "HOME=") {
+				hasHome = true
+				break
+			}
+		}
+		if !hasHome {
+			homeDir, err := os.UserHomeDir()
+			if err == nil {
+				env = append(env, "HOME="+homeDir)
+			}
+		}
+		cmd.Env = env
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			binaryBuildErr = err
+			t.Logf("Failed to build hotnote: %v\n%s", err, output)
+		}
 	})
 
-	tempBinaryPath := filepath.Join(binaryDir, "hotnote")
-	t.Log("Building hotnote binary...")
-
-	cmd := exec.Command("go", "build", "-o", tempBinaryPath, "./cmd/hotnote")
-	cmd.Dir = projectRoot
-	cmd.Env = os.Environ()
-	if output, err := cmd.CombinedOutput(); err != nil {
-		t.Fatalf("Failed to build hotnote: %v\n%s", err, output)
+	if binaryBuildErr != nil {
+		t.Fatalf("Failed to build hotnote: %v", binaryBuildErr)
 	}
-	return tempBinaryPath
+
+	return binaryPath
 }
 
 func runHotnote(t *testing.T, args ...string) string {
