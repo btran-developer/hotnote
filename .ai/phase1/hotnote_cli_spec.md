@@ -335,3 +335,99 @@ hotnote open my-idea           # Searches recursively
 hotnote open projects/my-idea  # Direct path lookup
 hotnote render my-idea         # Searches recursively
 hotnote render projects/my-idea # Direct path lookup
+
+---
+
+## 13. hotnote rename
+
+Usage:
+hotnote rename <old-slug> <new-slug>
+
+Behavior:
+- Rename note in current workspace
+- Hybrid path resolution for old-slug
+- Reject if new-slug already exists
+- Creates parent directories for new-slug if needed
+
+Flags:
+--json
+--pretty
+
+Output:
+Renamed note: my-idea → my-new-idea
+
+JSON:
+{
+  "status": "renamed",
+  "old": "my-idea",
+  "new": "my-new-idea"
+}
+
+Errors:
+- note not found
+- destination already exists
+- multiple matches (old-slug)
+
+---
+
+## 14. hotnote folder rename
+
+Usage:
+hotnote folder rename <old-name> <new-name>
+
+Behavior:
+- Rename folder in current workspace
+- Validates both paths stay within workspace
+- Reject if destination already exists
+- Rename operation is atomic (os.Rename)
+
+Flags:
+--json
+--pretty
+
+Output:
+Renamed folder: projects/2024 → projects/2025
+
+JSON:
+{
+  "status": "renamed",
+  "old": "projects/2024",
+  "new": "projects/2025"
+}
+
+Errors:
+- folder not found
+- destination already exists
+- invalid folder path
+- cannot rename workspace root
+
+---
+
+## 15. hotnote workspace rename
+
+Usage:
+hotnote workspace rename <old-name> <new-name>
+
+Behavior:
+- Rename workspace entry in config
+- Does NOT move workspace directory (name is alias, path stays)
+- Update current_workspace if renaming the current one
+- Reject if new-name already exists
+
+Flags:
+--json
+--pretty
+
+Output:
+Renamed workspace: proj-a → proj-b
+
+JSON:
+{
+  "status": "renamed",
+  "old": "proj-a",
+  "new": "proj-b"
+}
+
+Errors:
+- workspace not found
+- workspace already exists

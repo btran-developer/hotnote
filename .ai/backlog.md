@@ -77,6 +77,32 @@
 - [ ] Document subfolder support
 - [ ] Document AI agent compatibility
 
+### Issue K: rename Command
+- [ ] Create `cmd/rename.go`
+- [ ] `hotnote rename <old> <new>` renames note
+- [ ] Hybrid path resolution for old-slug
+- [ ] Uses existing `Store.Rename()` method
+- [ ] Validates new-slug doesn't conflict with existing note
+- [ ] Export `slugify()` or move to internal package
+- [ ] JSON output support
+
+### Issue L: folder rename Command
+- [ ] Create `cmd/folder.go` with `folder` parent command
+- [ ] `hotnote folder rename <old> <new>` renames folder
+- [ ] Validate both paths with `pathutil.ValidateFolderPath`
+- [ ] Reject if destination folder exists
+- [ ] Reject renaming workspace root
+- [ ] JSON output support
+
+### Issue M: workspace rename Command
+- [ ] Add `workspaceRenameCmd` to `cmd/workspace.go`
+- [ ] `hotnote workspace rename <old> <new>` renames workspace
+- [ ] Add `Rename(oldName, newName string) error` to `workspace.Manager`
+- [ ] Update config.workspaces map (move value, delete old key)
+- [ ] Update current_workspace if renaming current
+- [ ] Safety: reject if new-name already exists
+- [ ] JSON output support
+
 ---
 
 ### Legacy: CLI (Phase 1) - Original
