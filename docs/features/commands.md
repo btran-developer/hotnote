@@ -625,6 +625,68 @@ Deleted note: my-idea
 
 ---
 
+## hotnote rename
+
+Rename a note in the current workspace.
+
+### Usage
+
+```bash
+hotnote rename <old> <new> [flags]
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `old` | Current slug of the note (supports subfolder paths like `projects/my-note`) |
+| `new` | New title for the note (will be slugified) |
+
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--force` | Skip confirmation prompt |
+
+### Path Resolution
+
+The rename command uses hybrid path resolution for the old slug:
+- If input contains `/`, treats as direct relative path
+- If input doesn't contain `/`, searches recursively by slug
+
+### Examples
+
+```bash
+# Rename note at root
+hotnote rename my-idea "New Idea"
+
+# Rename note in subfolder
+hotnote rename projects/my-note projects/renamed-note
+
+# Force rename without confirmation
+hotnote rename my-note "New Title" --force
+```
+
+**Output:**
+```
+Renamed note: my-idea → new-idea
+```
+
+**JSON output (`--json`):**
+```json
+{"status": "renamed", "old_slug": "my-idea", "new_slug": "new-idea"}
+```
+
+**Errors:**
+
+| Error | Exit Code | Description |
+|-------|-----------|-------------|
+| Note not found | 2 | Slug does not exist |
+| Multiple matches | 3 | Ambiguous basename, use more specific path |
+| Note already exists | 1 | Destination slug already exists |
+
+---
+
 ## hotnote tui
 
 Launch the terminal user interface (TUI).

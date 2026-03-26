@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"hotnotego/internal/fsutil"
+	slugifypkg "hotnotego/internal/slugify"
 	"hotnotego/internal/storage"
 	"hotnotego/internal/workspace"
 )
@@ -120,7 +121,7 @@ func BenchmarkNewNote(b *testing.B) {
 		}
 		store := storage.NewStore(wm)
 
-		slug := slugify(title)
+		slug := slugifypkg.Slugify(title)
 		noteID := uuid.New()
 		createdAt := time.Now().UTC().Format(time.RFC3339)
 		content := fmt.Sprintf("---\nid: %s\ntitle: %s\ncreated_at: %s\nupdated_at: %s\ntags: []\n---\n\n# %s\n\n", noteID, title, createdAt, createdAt, title)

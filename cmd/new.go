@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	exitorrors "hotnotego/internal/errors"
+	slugifypkg "hotnotego/internal/slugify"
 	"hotnotego/internal/storage"
 	"hotnotego/internal/workspace"
 )
@@ -20,7 +20,7 @@ var newCmd = &cobra.Command{
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
-		id := slugify(title)
+		id := slugifypkg.Slugify(title)
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
@@ -74,22 +74,4 @@ var newCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(newCmd)
-}
-
-// slugify converts a string to a slug (lowercase, hyphen-separated)
-func slugify(s string) string {
-	s = strings.ToLower(s)
-	s = strings.ReplaceAll(s, " ", "-")
-	var result strings.Builder
-	for _, r := range s {
-		if (r >= 'a' && r <= 'z') || (r >= '0' && r <= '9') || r == '-' {
-			result.WriteRune(r)
-		}
-	}
-	s = result.String()
-	for strings.Contains(s, "--") {
-		s = strings.ReplaceAll(s, "--", "-")
-	}
-	s = strings.Trim(s, "-")
-	return s
 }

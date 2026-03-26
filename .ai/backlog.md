@@ -78,13 +78,13 @@
 - [ ] Document AI agent compatibility
 
 ### Issue K: rename Command
-- [ ] Create `cmd/rename.go`
-- [ ] `hotnote rename <old> <new>` renames note
-- [ ] Hybrid path resolution for old-slug
-- [ ] Uses existing `Store.Rename()` method
-- [ ] Validates new-slug doesn't conflict with existing note
-- [ ] Export `slugify()` or move to internal package
-- [ ] JSON output support
+- [x] Create `cmd/rename.go`
+- [x] `hotnote rename <old> <new>` renames note
+- [x] Hybrid path resolution for old-slug
+- [x] Uses existing `Store.Rename()` method
+- [x] Validates new-slug doesn't conflict with existing note
+- [x] Export `slugify()` or move to internal package
+- [x] JSON output support
 
 ### Issue L: folder rename Command
 - [ ] Create `cmd/folder.go` with `folder` parent command
