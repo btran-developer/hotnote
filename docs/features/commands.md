@@ -13,7 +13,7 @@ These flags work with all commands:
 | `--version` | | `false` | Show version information |
 | `--help` | `-h` | `false` | Show help for any command |
 
-> **Note:** The `--data-dir` flag was removed in favor of workspace-based organization.
+> **Note:** The `--data-dir` flag is deprecated and non-functional. Use workspace-based organization instead.
 
 ## Exit Codes
 
@@ -43,6 +43,14 @@ hotnote new [title] [flags]
 |----------|-------------|
 | `title` | Title of the note (will be slugified) |
 
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--path` | Create note in specific folder (auto-creates if needed) |
+| `--no-open` | Create note without opening in editor |
+| `--slug` | Explicit slug (disables auto-slugify) |
+
 ### Examples
 
 ```bash
@@ -51,6 +59,12 @@ hotnote new "My Research"
 
 # Create a note with special characters
 hotnote new "Q3 2024 Goals!"
+
+# Create note in subfolder
+hotnote new "My Research" --path projects
+
+# Create note with explicit slug
+hotnote new "My Research" --slug my-research
 ```
 
 ### Output Formats
@@ -97,7 +111,7 @@ Created note: my-research
 
 ## hotnote list
 
-List all notes in the current workspace.
+List all notes in the current workspace, including notes in subfolders.
 
 ### Usage
 
@@ -412,6 +426,214 @@ hotnote workspace use work
 ```
 
 All subsequent `new`, `list`, `open`, and `render` commands will use the selected workspace.
+
+#### delete
+
+Delete a workspace and all its contents.
+
+```bash
+hotnote workspace delete <name>
+```
+
+| Flag | Description |
+|------|-------------|
+| `--force` | Skip confirmation prompt |
+
+```bash
+# Delete workspace (prompts for confirmation)
+hotnote workspace delete work
+
+# Delete workspace without confirmation
+hotnote workspace delete work --force
+```
+
+**Output:**
+```
+Delete workspace 'work' and all contents? [y/N]: y
+Deleted workspace: work
+```
+
+**JSON output (`--json`):**
+```json
+{"status": "deleted", "workspace": "work"}
+```
+
+**Errors:**
+- Workspace not found
+- Cannot delete current workspace (switch first)
+- Cannot delete last workspace
+
+---
+
+## hotnote mkdir
+
+Create a folder in the current workspace.
+
+### Usage
+
+```bash
+hotnote mkdir <folder>
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `folder` | Name of folder to create (supports nested paths) |
+
+### Examples
+
+```bash
+# Create a folder
+hotnote mkdir projects
+
+# Create nested folder
+hotnote mkdir projects/2024
+```
+
+**Output:**
+```
+Created folder: projects
+```
+
+**JSON output (`--json`):**
+```json
+{"status": "created", "folder": "projects", "path": "/Users/user/.local/share/hotnote/workspaces/default/projects"}
+```
+
+---
+
+## hotnote rmdir
+
+Delete a folder from the current workspace.
+
+### Usage
+
+```bash
+hotnote rmdir <folder> [flags]
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `folder` | Name of folder to delete |
+
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--force` | Skip confirmation prompt |
+
+### Examples
+
+```bash
+# Delete folder (prompts if not empty)
+hotnote rmdir projects
+
+# Force delete without confirmation
+hotnote rmdir projects --force
+```
+
+**Output:**
+```
+Delete folder 'projects' and all contents? [y/N]: y
+Deleted folder: projects
+```
+
+**JSON output (`--json`):**
+```json
+{"status": "deleted", "folder": "projects"}
+```
+
+---
+
+## hotnote delete
+
+Delete a note from the current workspace.
+
+### Usage
+
+```bash
+hotnote delete <slug> [flags]
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `slug` | Slug of note to delete (supports subfolder paths like `projects/my-note`) |
+
+### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--force` | Skip confirmation prompt |
+
+### Path Resolution
+
+The delete command uses hybrid path resolution:
+- If input contains `/`, treats as direct relative path
+- If input doesn't contain `/`, searches recursively by slug
+
+### Examples
+
+```bash
+# Delete note at root
+hotnote delete my-idea
+
+# Delete note in subfolder
+hotnote delete projects/my-idea
+
+# Force delete without confirmation
+hotnote delete my-idea --force
+```
+
+**Output:**
+```
+Delete note 'my-idea'? [y/N]: y
+Deleted note: my-idea
+```
+
+**JSON output (`--json`):**
+```json
+{"status": "deleted", "slug": "my-idea"}
+```
+
+**Errors:**
+- Note not found
+- Multiple matches (specify full path)
+
+---
+
+## hotnote tui
+
+Launch the terminal user interface (TUI).
+
+### Usage
+
+```bash
+hotnote tui
+```
+
+### Description
+
+Opens an interactive TUI with:
+- Tree view of folders and notes
+- Markdown preview pane
+- Keyboard shortcuts for navigation and operations
+
+### Keybindings
+
+| Key | Action |
+|-----|--------|
+| `n` | Create new note |
+| `Shift+N` | Create new folder |
+| `d` | Delete note/folder |
+| `Ctrl+M` | Rename note |
+| `e` | Open in external editor |
+| `Ctrl+R` | Toggle rendered/raw view |
+| `?` | Show help |
 
 ## hotnote version
 

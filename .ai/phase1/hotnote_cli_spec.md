@@ -192,3 +192,146 @@ workspace already exists
 - Atomic file writes
 - Deterministic output
 - Human + JSON modes supported
+
+---
+
+## 8. hotnote mkdir
+
+Usage:
+hotnote mkdir <folder>
+
+Behavior:
+- Create folder in current workspace
+- Support nested paths (e.g., `projects/2024`)
+- Auto-create parent folders if needed
+
+Flags:
+--json
+--pretty
+
+Output:
+Created folder: projects
+
+JSON:
+{
+  "status": "created",
+  "folder": "projects",
+  "path": "~/.local/share/hotnote/workspaces/default/projects"
+}
+
+Errors:
+- folder already exists
+- workspace not initialized
+
+---
+
+## 9. hotnote rmdir
+
+Usage:
+hotnote rmdir <folder>
+
+Behavior:
+- Delete folder from current workspace
+- Prompt for confirmation if folder not empty
+- Skip prompt with --force
+
+Flags:
+--force
+--json
+--pretty
+
+Output:
+Delete folder 'projects' and all contents? [y/N]: y
+Deleted folder: projects
+
+JSON:
+{
+  "status": "deleted",
+  "folder": "projects"
+}
+
+Errors:
+- folder not found
+- cannot delete workspace root
+
+---
+
+## 10. hotnote delete
+
+Usage:
+hotnote delete <slug>
+
+Behavior:
+- Delete note from current workspace
+- Hybrid path resolution (see Section 12)
+- Prompt for confirmation
+- Skip prompt with --force
+
+Flags:
+--force
+--json
+--pretty
+
+Output:
+Delete note 'my-idea'? [y/N]: y
+Deleted note: my-idea
+
+JSON:
+{
+  "status": "deleted",
+  "slug": "my-idea"
+}
+
+Errors:
+- note not found
+- multiple matches (show list)
+
+---
+
+## 11. workspace delete
+
+Usage:
+hotnote workspace delete <name>
+
+Behavior:
+- Delete workspace and all contents
+- Recursively remove directory
+- Prompt for confirmation
+- Skip prompt with --force
+
+Flags:
+--force
+--json
+--pretty
+
+Output:
+Delete workspace 'work' and all contents? [y/N]: y
+Deleted workspace: work
+
+JSON:
+{
+  "status": "deleted",
+  "workspace": "work"
+}
+
+Errors:
+- workspace not found
+- cannot delete current workspace (switch first)
+- cannot delete last workspace
+
+---
+
+## 12. Hybrid Path Resolution
+
+For commands that accept a slug/path argument (open, render, delete):
+
+Resolution Logic:
+1. If input contains `/`, treat as direct relative path to workspace root
+2. If input does not contain `/`, search recursively by slug
+3. If multiple matches found, show list and prompt user to specify full path
+
+Examples:
+hotnote open my-idea           # Searches recursively
+hotnote open projects/my-idea  # Direct path lookup
+hotnote render my-idea         # Searches recursively
+hotnote render projects/my-idea # Direct path lookup

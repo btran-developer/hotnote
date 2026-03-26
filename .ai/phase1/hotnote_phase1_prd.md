@@ -39,20 +39,39 @@ Secondary (future):
 
 Create a note:
     hotnote new "My Idea"
+    hotnote new "My Idea" --path projects    # In subfolder
 
-List notes:
+List notes (including subfolders):
     hotnote list
+    hotnote list --json
 
 Open/edit a note:
     hotnote open my-idea
+    hotnote open projects/my-idea           # Direct path
 
 Render note:
     hotnote render my-idea
+    hotnote render projects/my-idea          # Direct path
+
+Create folder:
+    hotnote mkdir projects
+    hotnote mkdir projects/2024
+
+Delete note:
+    hotnote delete my-idea
+    hotnote delete my-idea --force
+
+Delete folder:
+    hotnote rmdir projects
+    hotnote rmdir projects --force
 
 Workspace management:
     hotnote workspace init
     hotnote workspace list
     hotnote workspace use <name>
+    hotnote workspace new <name>
+    hotnote workspace delete <name>
+    hotnote workspace delete <name> --force
 
 ---
 

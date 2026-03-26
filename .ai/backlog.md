@@ -1,7 +1,99 @@
 # Backlog — HotNote
 
-## CLI (Phase 1)
-- [x] All items completed
+## CLI (Phase 1) - Expanded
+
+### Issue A: Subfolder Support - Storage Layer
+- [ ] Add `Store.List()` with `filepath.WalkDir`
+- [ ] Add `Store.Delete()` method
+- [ ] Add `Store.Rename()` method
+- [ ] Update `Store.Path()` for hybrid resolution (direct + recursive)
+
+### Issue B: Subfolder Support - CLI Commands
+- [ ] Update `list` command to show subfolder notes
+- [ ] Fix `open` command slugify inconsistency
+- [ ] Fix `render` command slugify inconsistency
+- [ ] Fix `new` command to support `--path` flag
+
+### Issue C: AI Agent Compatibility
+- [ ] Use `ExitInvalidInput` for "title required", "note exists" errors
+- [ ] Fix `ai` command JSON output
+- [ ] Fix `workspace list` schema to match spec
+- [ ] Make error messages deterministic (remove `%v` formatting)
+- [ ] Add `--no-open` flag to `new` command
+- [ ] Add `--slug` flag to `new` command
+
+### Issue D: Documentation Fixes
+- [ ] Remove or implement `--data-dir` flag
+- [ ] Document `hotnote tui` command
+- [ ] Fix `workspace new` help text (positional vs flag)
+- [ ] Add error documentation for all commands
+- [ ] Fix `workspace list` output examples
+- [ ] Remove `$DEBUG` documentation if not implemented
+
+### Issue E: mkdir Command
+- [ ] Create `cmd/mkdir.go`
+- [ ] `hotnote mkdir <folder>` creates folder
+- [ ] Support nested folder creation
+- [ ] JSON output support
+- [ ] Error handling
+
+### Issue F: rmdir Command
+- [ ] Create `cmd/rmdir.go`
+- [ ] `hotnote rmdir <folder>` deletes folder
+- [ ] Confirmation prompt if folder not empty
+- [ ] `--force` flag to skip prompt
+- [ ] JSON output support
+
+### Issue G: delete Command
+- [ ] Create `cmd/delete.go`
+- [ ] `hotnote delete <slug>` deletes note
+- [ ] Add `Delete(id string) error` to `storage.Store`
+- [ ] Hybrid path resolution support
+- [ ] Confirmation prompt by default
+- [ ] `--force` flag to skip prompt
+- [ ] JSON output support
+
+### Issue H: workspace delete Command
+- [ ] Add `workspaceDeleteCmd` to `cmd/workspace.go`
+- [ ] `hotnote workspace delete <name>` deletes workspace
+- [ ] Add `Delete(name string, force bool) error` to `workspace.Manager`
+- [ ] Recursively delete workspace directory and all contents
+- [ ] Confirmation prompt by default
+- [ ] `--force` flag to skip prompt
+- [ ] Safety checks (current, last workspace)
+
+### Issue I: Unit Tests
+- [ ] Test hybrid path resolution
+- [ ] Test `Store.Delete()`, `Store.Rename()`, `Store.List()`
+- [ ] Test `workspace.Manager.Delete()`
+- [ ] Test all new commands
+- [ ] Test safety checks
+- [ ] Test conflict resolution
+
+### Issue J: Documentation Updates
+- [ ] Update `docs/features/commands.md`
+- [ ] Update CLI examples
+- [ ] Add error scenarios
+- [ ] Document subfolder support
+- [ ] Document AI agent compatibility
+
+---
+
+### Legacy: CLI (Phase 1) - Original
+
+#### Core Commands
+- [x] new command
+- [x] list command
+- [x] open command
+- [x] render command
+
+#### Workspace Management
+- [x] workspace init
+- [x] workspace list
+- [x] workspace use
+- [x] workspace new
+
+---
 
 ## TUI (Phase 2)
 
@@ -70,6 +162,8 @@
 - [ ] Ctrl+G to manual refresh
 - [ ] Edge case handling
 - [ ] Final testing
+
+---
 
 ## Future
 - Tabs (multiple notes open simultaneously)
