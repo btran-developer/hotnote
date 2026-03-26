@@ -123,3 +123,484 @@ func TestEnsure_CreatesDirectory(t *testing.T) {
 	_, err = os.Stat(expectedPath)
 	assert.NoError(t, err)
 }
+
+func TestList_Empty(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	notes, err := store.List()
+	require.NoError(t, err)
+	assert.Empty(t, notes)
+}
+
+func TestList_TopLevel(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.WriteFile(filepath.Join(workspaceDir, "note1.md"), []byte("# Note 1"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "note2.md"), []byte("# Note 2"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	notes, err := store.List()
+	require.NoError(t, err)
+	assert.Len(t, notes, 2)
+
+	slugs := []string{notes[0].Slug, notes[1].Slug}
+	assert.Contains(t, slugs, "note1")
+	assert.Contains(t, slugs, "note2")
+}
+
+func TestList_Nested(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "projects"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "projects", "my-idea.md"), []byte("# My Idea"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	notes, err := store.List()
+	require.NoError(t, err)
+	assert.Len(t, notes, 1)
+	assert.Equal(t, "projects/my-idea", notes[0].Slug)
+}
+
+func TestList_Mixed(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "folder1"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "root-note.md"), []byte("# Root Note"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "folder1", "nested.md"), []byte("# Nested"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	notes, err := store.List()
+	require.NoError(t, err)
+	assert.Len(t, notes, 2)
+
+	slugs := []string{notes[0].Slug, notes[1].Slug}
+	assert.Contains(t, slugs, "root-note")
+	assert.Contains(t, slugs, "folder1/nested")
+}
+
+func TestList_SkipsDirectories(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "empty-folder"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "note.md"), []byte("# Note"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	notes, err := store.List()
+	require.NoError(t, err)
+	assert.Len(t, notes, 1)
+	assert.Equal(t, "note", notes[0].Slug)
+}
+
+func TestDelete_Success(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	notePath := filepath.Join(workspaceDir, "to-delete.md")
+	err = os.WriteFile(notePath, []byte("# To Delete"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Delete("to-delete")
+	require.NoError(t, err)
+
+	_, err = os.Stat(notePath)
+	assert.True(t, os.IsNotExist(err))
+}
+
+func TestDelete_NotExists(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Delete("nonexistent")
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, os.ErrNotExist), "expected not exists error, got: %v", err)
+}
+
+func TestDelete_Nested(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "projects"), 0755)
+	require.NoError(t, err)
+	notePath := filepath.Join(workspaceDir, "projects", "note.md")
+	err = os.WriteFile(notePath, []byte("# Note"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Delete("projects/note")
+	require.NoError(t, err)
+
+	_, err = os.Stat(notePath)
+	assert.True(t, os.IsNotExist(err))
+}
+
+func TestRename_Success(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	oldPath := filepath.Join(workspaceDir, "old-note.md")
+	err = os.WriteFile(oldPath, []byte("# Old Note"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Rename("old-note", "new-note")
+	require.NoError(t, err)
+
+	_, err = os.Stat(oldPath)
+	assert.True(t, os.IsNotExist(err))
+
+	newPath := filepath.Join(workspaceDir, "new-note.md")
+	_, err = os.Stat(newPath)
+	assert.NoError(t, err)
+}
+
+func TestRename_SourceNotFound(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Rename("nonexistent", "new-name")
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, ErrNoteNotFound))
+}
+
+func TestRename_DestExists(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.WriteFile(filepath.Join(workspaceDir, "old-note.md"), []byte("# Old"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "existing.md"), []byte("# Existing"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Rename("old-note", "existing")
+	assert.Error(t, err)
+	assert.True(t, errors.Is(err, ErrNoteAlreadyExists))
+}
+
+func TestRename_NestedToTop(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "folder"), 0755)
+	require.NoError(t, err)
+	oldPath := filepath.Join(workspaceDir, "folder", "note.md")
+	err = os.WriteFile(oldPath, []byte("# Note"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Rename("folder/note", "note")
+	require.NoError(t, err)
+
+	_, err = os.Stat(oldPath)
+	assert.True(t, os.IsNotExist(err))
+
+	newPath := filepath.Join(workspaceDir, "note.md")
+	_, err = os.Stat(newPath)
+	assert.NoError(t, err)
+}
+
+func TestRename_TopToNested(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	oldPath := filepath.Join(workspaceDir, "note.md")
+	err = os.WriteFile(oldPath, []byte("# Note"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Rename("note", "folder/new-note")
+	require.NoError(t, err)
+
+	_, err = os.Stat(oldPath)
+	assert.True(t, os.IsNotExist(err))
+
+	newPath := filepath.Join(workspaceDir, "folder", "new-note.md")
+	_, err = os.Stat(newPath)
+	assert.NoError(t, err)
+}
+
+func TestRename_WithDotMdSuffix(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	oldPath := filepath.Join(workspaceDir, "old.md")
+	err = os.WriteFile(oldPath, []byte("# Old"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	err = store.Rename("old.md", "new.md")
+	require.NoError(t, err)
+
+	_, err = os.Stat(oldPath)
+	assert.True(t, os.IsNotExist(err))
+
+	newPath := filepath.Join(workspaceDir, "new.md")
+	_, err = os.Stat(newPath)
+	assert.NoError(t, err)
+}
+
+func TestResolve_DirectPath(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "projects"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "projects", "my-idea.md"), []byte("# My Idea"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	slug, err := store.Resolve("projects/my-idea")
+	require.NoError(t, err)
+	assert.Equal(t, "projects/my-idea", slug)
+}
+
+func TestResolve_DirectPath_NotFound(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	_, err = store.Resolve("nonexistent/path/note")
+	assert.ErrorIs(t, err, ErrNoteNotFound)
+}
+
+func TestResolve_Recursive_Single(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "folder1"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "folder1", "my-note.md"), []byte("# My Note"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	slug, err := store.Resolve("my-note")
+	require.NoError(t, err)
+	assert.Equal(t, "folder1/my-note", slug)
+}
+
+func TestResolve_Recursive_NotFound(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.WriteFile(filepath.Join(workspaceDir, "note.md"), []byte("# Note"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	_, err = store.Resolve("nonexistent")
+	assert.ErrorIs(t, err, ErrNoteNotFound)
+}
+
+func TestResolve_Recursive_Multiple(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "folder1"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "folder2"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "folder1", "duplicate.md"), []byte("# Note 1"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "folder2", "duplicate.md"), []byte("# Note 2"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	_, err = store.Resolve("duplicate")
+	assert.ErrorIs(t, err, ErrMultipleMatches)
+}
+
+func TestResolve_DirectPath_Nested(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.MkdirAll(filepath.Join(workspaceDir, "folder1"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "folder2"), 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "folder1", "note.md"), []byte("# Note in folder1"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(workspaceDir, "folder2", "note.md"), []byte("# Note in folder2"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	slug, err := store.Resolve("folder1/note")
+	require.NoError(t, err)
+	assert.Equal(t, "folder1/note", slug)
+}

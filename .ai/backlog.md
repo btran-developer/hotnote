@@ -3,10 +3,10 @@
 ## CLI (Phase 1) - Expanded
 
 ### Issue A: Subfolder Support - Storage Layer
-- [ ] Add `Store.List()` with `filepath.WalkDir`
-- [ ] Add `Store.Delete()` method
-- [ ] Add `Store.Rename()` method
-- [ ] Update `Store.Path()` for hybrid resolution (direct + recursive)
+- [x] Add `Store.List()` with `filepath.WalkDir`
+- [x] Add `Store.Delete()` method
+- [x] Add `Store.Rename()` method
+- [x] Update `Store.Path()` for hybrid resolution (direct + recursive)
 
 ### Issue B: Subfolder Support - CLI Commands
 - [ ] Update `list` command to show subfolder notes
@@ -45,9 +45,9 @@
 - [x] JSON output support
 
 ### Issue G: delete Command
+- [x] Add `Delete(id string) error` to `storage.Store`
 - [ ] Create `cmd/delete.go`
 - [ ] `hotnote delete <slug>` deletes note
-- [ ] Add `Delete(id string) error` to `storage.Store`
 - [ ] Hybrid path resolution support
 - [ ] Confirmation prompt by default
 - [ ] `--force` flag to skip prompt
@@ -63,11 +63,11 @@
 - [ ] Safety checks (current, last workspace)
 
 ### Issue I: Unit Tests
-- [ ] Test hybrid path resolution
-- [ ] Test `Store.Delete()`, `Store.Rename()`, `Store.List()`
+- [x] Test hybrid path resolution
+- [x] Test `Store.Delete()`, `Store.Rename()`, `Store.List()`
 - [ ] Test `workspace.Manager.Delete()`
-- [x] Test all new commands
-- [x] Test safety checks
+- [ ] Test all new commands
+- [ ] Test safety checks
 - [ ] Test conflict resolution
 
 ### Issue J: Documentation Updates
