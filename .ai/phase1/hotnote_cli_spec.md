@@ -29,16 +29,16 @@ Usage:
 hotnote new <title>
 
 Behavior:
-- Generate slug
-- Auto-resolve collision (default)
-- Create note under <workspace>/notes/
+- Generate slug from title
+- Create note under workspace root
 - Open in $EDITOR
+- Reject if slug already exists (no auto-resolution in CLI)
+- Auto-slug collision handling is available in TUI mode (see Phase 2, Issue 11)
 
 Flags:
 --no-open
 --path <dir>
 --slug <slug>
---no-auto-slug
 
 Output:
 Created note: project-a/my-idea.md
@@ -53,7 +53,7 @@ JSON:
 Errors:
 - title is required
 - path does not exist
-- slug exists (if --no-auto-slug)
+- slug exists
 
 ---
 
