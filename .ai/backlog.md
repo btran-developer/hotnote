@@ -87,12 +87,12 @@
 - [x] JSON output support
 
 ### Issue L: folder rename Command
-- [ ] Create `cmd/folder.go` with `folder` parent command
-- [ ] `hotnote folder rename <old> <new>` renames folder
-- [ ] Validate both paths with `pathutil.ValidateFolderPath`
-- [ ] Reject if destination folder exists
-- [ ] Reject renaming workspace root
-- [ ] JSON output support
+- [x] Create `cmd/folder.go` with `folder` parent command
+- [x] `hotnote folder rename <old> <new>` renames folder
+- [x] Validate both paths with `pathutil.ValidateFolderPath`
+- [x] Reject if destination folder exists
+- [x] Reject renaming workspace root
+- [x] JSON output support
 
 ### Issue M: workspace rename Command
 - [ ] Add `workspaceRenameCmd` to `cmd/workspace.go`
