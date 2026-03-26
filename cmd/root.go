@@ -31,17 +31,17 @@ func Execute() {
 func outputJSON(v interface{}) error {
 	var data []byte
 	var err error
-	
+
 	if prettyFlag {
 		data, err = json.MarshalIndent(v, "", "  ")
 	} else {
 		data, err = json.Marshal(v)
 	}
-	
+
 	if err != nil {
 		return err
 	}
-	
+
 	fmt.Println(string(data))
 	return nil
 }

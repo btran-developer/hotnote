@@ -77,14 +77,14 @@ var workspaceListCmd = &cobra.Command{
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
-		
+
 		// Get sorted workspace names for deterministic output
 		workspaceNames := make([]string, 0, len(workspaces))
 		for name := range workspaces {
 			workspaceNames = append(workspaceNames, name)
 		}
 		sort.Strings(workspaceNames)
-		
+
 		if jsonFlag {
 			var wsList []map[string]interface{}
 			for _, name := range workspaceNames {

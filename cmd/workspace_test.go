@@ -17,38 +17,34 @@ func getBinaryPath(t *testing.T) string {
 		t.Fatal(err)
 	}
 
-	// Determine project root
 	projectRoot := wd
 	if filepath.Base(wd) == "cmd" {
 		projectRoot = filepath.Dir(wd)
 	}
 
-	// Check for existing binary in project root
 	binaryPath := filepath.Join(projectRoot, "hotnote")
 	if _, err := os.Stat(binaryPath); err == nil {
 		return binaryPath
 	}
 
-	// Also check relative paths
-	paths := []string{
-		filepath.Join(projectRoot, "hotnote"),
-		filepath.Join(projectRoot, "cmd", "hotnote", "hotnote"),
+	binaryDir, err := os.MkdirTemp("", "hotnote-test-binary-*")
+	if err != nil {
+		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		os.RemoveAll(binaryDir)
+	})
 
-	for _, p := range paths {
-		if _, err := os.Stat(p); err == nil {
-			return p
-		}
-	}
-
-	// Build binary
+	tempBinaryPath := filepath.Join(binaryDir, "hotnote")
 	t.Log("Building hotnote binary...")
-	cmd := exec.Command("go", "build", "-o", "hotnote", "./cmd/hotnote")
+
+	cmd := exec.Command("go", "build", "-o", tempBinaryPath, "./cmd/hotnote")
 	cmd.Dir = projectRoot
+	cmd.Env = os.Environ()
 	if output, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("Failed to build hotnote: %v\n%s", err, output)
 	}
-	return filepath.Join(projectRoot, "hotnote")
+	return tempBinaryPath
 }
 
 func runHotnote(t *testing.T, args ...string) string {
@@ -61,27 +57,6 @@ func runHotnote(t *testing.T, args ...string) string {
 		t.Logf("Command failed: %v\nOutput: %s", err, string(out))
 	}
 	return string(out)
-}
-
-func setupTestConfig(t *testing.T) string {
-	configDir, err := os.MkdirTemp("", "hotnote-test-config-*")
-	require.NoError(t, err)
-
-	workspaceDir := filepath.Join(configDir, "workspaces", "default")
-	err = os.MkdirAll(workspaceDir, 0755)
-	require.NoError(t, err)
-
-	configDirPath := filepath.Join(configDir, ".config", "hotnote")
-	err = os.MkdirAll(configDirPath, 0755)
-	require.NoError(t, err)
-
-	configContent := "current_workspace: default\nworkspaces:\n  default: " + workspaceDir + "\n"
-	configPath := filepath.Join(configDirPath, "config.yaml")
-	err = os.WriteFile(configPath, []byte(configContent), 0644)
-	require.NoError(t, err)
-
-	t.Setenv("HOME", configDir)
-	return configDir
 }
 
 func TestWorkspaceInitJSON_Success(t *testing.T) {
@@ -102,7 +77,7 @@ func TestWorkspaceInitJSON_Success(t *testing.T) {
 }
 
 func TestWorkspaceInitJSON_AlreadyInitialized(t *testing.T) {
-	configDir := setupTestConfig(t)
+	configDir := setupTestWorkspace(t)
 	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "init", "--json")
@@ -116,7 +91,7 @@ func TestWorkspaceInitJSON_AlreadyInitialized(t *testing.T) {
 }
 
 func TestWorkspaceListJSON_Single(t *testing.T) {
-	configDir := setupTestConfig(t)
+	configDir := setupTestWorkspace(t)
 	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "list", "--json")
@@ -210,7 +185,7 @@ func TestWorkspaceUseJSON_Success(t *testing.T) {
 }
 
 func TestWorkspaceUseJSON_NotFound(t *testing.T) {
-	configDir := setupTestConfig(t)
+	configDir := setupTestWorkspace(t)
 	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "use", "nonexistent", "--json")
@@ -253,7 +228,7 @@ func TestWorkspaceNewJSON_Success(t *testing.T) {
 }
 
 func TestWorkspaceNewJSON_MissingName(t *testing.T) {
-	configDir := setupTestConfig(t)
+	configDir := setupTestWorkspace(t)
 	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "new", "--json")
@@ -267,7 +242,7 @@ func TestWorkspaceNewJSON_MissingName(t *testing.T) {
 }
 
 func TestWorkspaceNewJSON_AlreadyExists(t *testing.T) {
-	configDir := setupTestConfig(t)
+	configDir := setupTestWorkspace(t)
 	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "new", "default", "--json")
@@ -281,7 +256,7 @@ func TestWorkspaceNewJSON_AlreadyExists(t *testing.T) {
 }
 
 func TestWorkspaceJSON_ValidOutput(t *testing.T) {
-	configDir := setupTestConfig(t)
+	configDir := setupTestWorkspace(t)
 	t.Cleanup(func() { os.RemoveAll(configDir) })
 
 	out := runHotnote(t, "workspace", "list", "--json")

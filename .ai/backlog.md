@@ -31,18 +31,18 @@
 - [ ] Remove `$DEBUG` documentation if not implemented
 
 ### Issue E: mkdir Command
-- [ ] Create `cmd/mkdir.go`
-- [ ] `hotnote mkdir <folder>` creates folder
-- [ ] Support nested folder creation
-- [ ] JSON output support
-- [ ] Error handling
+- [x] Create `cmd/mkdir.go`
+- [x] `hotnote mkdir <folder>` creates folder
+- [x] Support nested folder creation
+- [x] JSON output support
+- [x] Error handling
 
 ### Issue F: rmdir Command
-- [ ] Create `cmd/rmdir.go`
-- [ ] `hotnote rmdir <folder>` deletes folder
-- [ ] Confirmation prompt if folder not empty
-- [ ] `--force` flag to skip prompt
-- [ ] JSON output support
+- [x] Create `cmd/rmdir.go`
+- [x] `hotnote rmdir <folder>` deletes folder
+- [x] Confirmation prompt if folder not empty
+- [x] `--force` flag to skip prompt
+- [x] JSON output support
 
 ### Issue G: delete Command
 - [ ] Create `cmd/delete.go`
@@ -66,8 +66,8 @@
 - [ ] Test hybrid path resolution
 - [ ] Test `Store.Delete()`, `Store.Rename()`, `Store.List()`
 - [ ] Test `workspace.Manager.Delete()`
-- [ ] Test all new commands
-- [ ] Test safety checks
+- [x] Test all new commands
+- [x] Test safety checks
 - [ ] Test conflict resolution
 
 ### Issue J: Documentation Updates

@@ -67,7 +67,7 @@ var listCmd = &cobra.Command{
 				if err != nil {
 					continue
 				}
-				
+
 				// Get creation time from filesystem
 				stat, err := os.Stat(filepath.Join(workspacePath, file.Name()))
 				var crTime time.Time

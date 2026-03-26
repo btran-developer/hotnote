@@ -501,6 +501,15 @@ Created folder: projects
 {"status": "created", "folder": "projects", "path": "/Users/user/.local/share/hotnote/workspaces/default/projects"}
 ```
 
+**Errors:**
+
+| Error | Exit Code | Description |
+|-------|-----------|-------------|
+| `folder already exists: <name>` | 1 | Folder already exists |
+| `invalid folder path: must be relative to workspace` | 3 | Absolute path provided |
+| `invalid folder path: must be inside workspace` | 3 | Path escapes workspace (e.g., `../outside`) |
+| `workspace not initialized` | 4 | No workspace configured |
+
 ---
 
 ## hotnote rmdir
@@ -545,6 +554,16 @@ Deleted folder: projects
 ```json
 {"status": "deleted", "folder": "projects"}
 ```
+
+**Errors:**
+
+| Error | Exit Code | Description |
+|-------|-----------|-------------|
+| `folder not found: <name>` | 2 | Folder does not exist |
+| `cannot delete workspace root` | 1 | Attempt to delete workspace root |
+| `folder not empty: use --force to delete` | 1 | Folder has contents, --force not provided |
+| `invalid folder path: must be relative to workspace` | 3 | Absolute path provided |
+| `invalid folder path: must be inside workspace` | 3 | Path escapes workspace (e.g., `../outside`) |
 
 ---
 

@@ -122,6 +122,20 @@ var (
 )
 ```
 
+### Path Validation Errors
+
+Defined in `internal/pathutil/pathutil.go` for folder operations:
+
+```go
+var (
+    ErrInvalidPath          = errors.New("invalid folder path: must be relative to workspace")
+    ErrPathOutsideWS        = errors.New("invalid folder path: must be inside workspace")
+    ErrPathIsWorkspaceRoot  = errors.New("cannot delete workspace root")
+)
+```
+
+These errors are used by `mkdir` and `rmdir` commands to validate that folder paths stay within the workspace boundaries.
+
 ## JSON Error Responses
 
 When `--json` flag is used, errors are formatted as JSON:

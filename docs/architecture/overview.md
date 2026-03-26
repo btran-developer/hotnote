@@ -33,6 +33,8 @@ hotnote/
 │   ├── fsutil/
 │   │   ├── fsutil.go           # Atomic file operations
 │   │   └── fsutil_test.go      # fsutil tests
+│   ├── pathutil/
+│   │   └── pathutil.go         # Path validation utilities
 │   ├── ai/                     # AI integration (stub)
 │   ├── markdown/               # Markdown processing (stub)
 │   ├── search/                 # Search functionality (stub)
@@ -90,6 +92,9 @@ Uses [Cobra](https://github.com/spf13/cobra) for command-line parsing. Each comm
 | `hotnote list` | `list.go` | List all notes |
 | `hotnote open` | `open.go` | Open note in `$EDITOR` |
 | `hotnote render` | `render.go` | Render markdown to HTML |
+| `hotnote mkdir` | `mkdir.go` | Create a folder |
+| `hotnote rmdir` | `rmdir.go` | Delete a folder |
+| `hotnote delete` | `delete.go` | Delete a note |
 | `hotnote workspace` | `workspace.go` | Manage workspaces |
 | `hotnote ai` | `ai.go` | AI operations (stub) |
 
