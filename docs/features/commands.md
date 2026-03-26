@@ -123,9 +123,6 @@ hotnote list [flags]
 
 | Flag | Description |
 |------|-------------|
-| `--sort name` | Sort alphabetically by slug (default) |
-| `--sort updated` | Sort by last modified time (newest first) |
-| `--sort created` | Sort by creation time (newest first) |
 | `--json` | Output in JSON format |
 | `--pretty` | Pretty-print JSON output |
 
@@ -137,12 +134,6 @@ hotnote list
 
 # List in JSON format
 hotnote list --json
-
-# Sort by updated time (newest first)
-hotnote list --sort updated
-
-# Sort by creation time (newest first)
-hotnote list --sort created
 
 # Pretty-printed JSON output
 hotnote list --json --pretty

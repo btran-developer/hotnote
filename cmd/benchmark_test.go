@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"testing"
 	"time"
 
@@ -201,93 +200,6 @@ func BenchmarkListNotes(b *testing.B) {
 							modTime time.Time
 						}{slug: slug, modTime: info.ModTime()})
 					}
-				}
-			}
-		})
-	}
-}
-
-// BenchmarkListNotesSorted benchmarks listing with different sort orders
-func BenchmarkListNotesSorted(b *testing.B) {
-	_, configPath, cleanup := setupBenchmarkWorkspace(b, 500)
-	defer cleanup()
-
-	restoreConfig := setBenchmarkConfig(b, configPath)
-	defer restoreConfig()
-
-	sortOrders := []string{"name", "updated", "created"}
-
-	for _, sortOrder := range sortOrders {
-		b.Run(fmt.Sprintf("sort_%s", sortOrder), func(b *testing.B) {
-			wm, err := workspace.NewManager()
-			if err != nil {
-				b.Fatalf("create workspace manager: %v", err)
-			}
-
-			_, wp, err := wm.Current()
-			if err != nil {
-				b.Fatalf("get current workspace: %v", err)
-			}
-
-			files, err := os.ReadDir(wp)
-			if err != nil {
-				b.Fatalf("read notes directory: %v", err)
-			}
-
-			type noteData struct {
-				slug    string
-				modTime time.Time
-				crTime  time.Time
-			}
-			var notes []noteData
-
-			for _, file := range files {
-				if !file.IsDir() && filepath.Ext(file.Name()) == ".md" {
-					info, err := file.Info()
-					if err != nil {
-						continue
-					}
-					slug := file.Name()[:len(file.Name())-3]
-					notes = append(notes, noteData{
-						slug:    slug,
-						modTime: info.ModTime(),
-						crTime:  info.ModTime(),
-					})
-				}
-			}
-
-			for i := 0; i < 3; i++ {
-				switch sortOrder {
-				case "updated":
-					sort.Slice(notes, func(i, j int) bool {
-						return notes[i].modTime.After(notes[j].modTime)
-					})
-				case "created":
-					sort.Slice(notes, func(i, j int) bool {
-						return notes[i].crTime.After(notes[j].crTime)
-					})
-				default:
-					sort.Slice(notes, func(i, j int) bool {
-						return notes[i].slug < notes[j].slug
-					})
-				}
-			}
-			b.ResetTimer()
-
-			for i := 0; i < b.N; i++ {
-				switch sortOrder {
-				case "updated":
-					sort.Slice(notes, func(i, j int) bool {
-						return notes[i].modTime.After(notes[j].modTime)
-					})
-				case "created":
-					sort.Slice(notes, func(i, j int) bool {
-						return notes[i].crTime.After(notes[j].crTime)
-					})
-				default:
-					sort.Slice(notes, func(i, j int) bool {
-						return notes[i].slug < notes[j].slug
-					})
 				}
 			}
 		})

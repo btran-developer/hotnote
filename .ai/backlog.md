@@ -9,10 +9,10 @@
 - [x] Update `Store.Path()` for hybrid resolution (direct + recursive)
 
 ### Issue B: Subfolder Support - CLI Commands
-- [ ] Update `list` command to show subfolder notes
-- [ ] Fix `open` command slugify inconsistency
-- [ ] Fix `render` command slugify inconsistency
-- [ ] Fix `new` command to support `--path` flag
+- [x] Update `list` command to show subfolder notes
+- [x] Fix `open` command slugify inconsistency
+- [x] Fix `render` command slugify inconsistency
+- [x] Fix `new` command to support `--path` flag
 
 ### Issue C: AI Agent Compatibility
 - [ ] Use `ExitInvalidInput` for "title required", "note exists" errors
@@ -102,6 +102,13 @@
 - [ ] Update current_workspace if renaming current
 - [ ] Safety: reject if new-name already exists
 - [ ] JSON output support
+
+### Issue N: Add CrTime to NoteInfo
+- [ ] Add CrTime field to storage.NoteInfo struct
+- [ ] Populate from frontmatter created_at when available
+- [ ] Fall back to filesystem birth time or ModTime
+- [ ] Display creation time in list output
+- [ ] Document behavior in commands.md
 
 ---
 

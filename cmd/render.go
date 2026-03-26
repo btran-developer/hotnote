@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -42,7 +43,34 @@ var renderCmd = &cobra.Command{
 		}
 
 		store := storage.NewStore(wm)
-		path, err := store.Path(title)
+
+		resolvedSlug, err := store.Resolve(title)
+		if errors.Is(err, storage.ErrNoteNotFound) {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("note not found: %s", title))
+			} else {
+				fmt.Printf("note not found: %s\n", title)
+			}
+			os.Exit(exitorrors.ExitNotFound)
+		}
+		if errors.Is(err, storage.ErrMultipleMatches) {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("multiple notes match '%s': use a more specific path", title))
+			} else {
+				fmt.Printf("multiple notes match '%s': use a more specific path\n", title)
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
+		if err != nil {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("resolve note: %v", err))
+			} else {
+				fmt.Printf("resolve note: %v\n", err)
+			}
+			os.Exit(exitorrors.ExitGeneral)
+		}
+
+		path, err := store.Path(resolvedSlug)
 		if err != nil {
 			if jsonFlag {
 				outputJSONError(fmt.Sprintf("get note path: %v", err))

@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -28,7 +29,34 @@ var openCmd = &cobra.Command{
 		}
 
 		store := storage.NewStore(wm)
-		path, err := store.Path(title)
+
+		resolvedSlug, err := store.Resolve(title)
+		if errors.Is(err, storage.ErrNoteNotFound) {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("note not found: %s", title))
+			} else {
+				fmt.Printf("note not found: %s\n", title)
+			}
+			os.Exit(exitorrors.ExitNotFound)
+		}
+		if errors.Is(err, storage.ErrMultipleMatches) {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("multiple notes match '%s': use a more specific path", title))
+			} else {
+				fmt.Printf("multiple notes match '%s': use a more specific path\n", title)
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
+		if err != nil {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("resolve note: %v", err))
+			} else {
+				fmt.Printf("resolve note: %v\n", err)
+			}
+			os.Exit(exitorrors.ExitGeneral)
+		}
+
+		path, err := store.Path(resolvedSlug)
 		if err != nil {
 			if jsonFlag {
 				outputJSONError(fmt.Sprintf("get note path: %v", err))
@@ -38,33 +66,20 @@ var openCmd = &cobra.Command{
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
-		// Check if file exists
-		if _, err := os.Stat(path); os.IsNotExist(err) {
-			if jsonFlag {
-				outputJSONError("note not found")
-			} else {
-				fmt.Println("note not found")
-			}
-			os.Exit(exitorrors.ExitNotFound)
-		}
-
 		if jsonFlag {
 			response := map[string]string{
 				"status": "opened",
 				"path":   path,
 			}
 			outputJSON(response)
-			// In JSON mode, we don't actually open the editor
 			return
 		}
 
-		// Determine editor to use
 		editor := os.Getenv("EDITOR")
 		if editor == "" {
-			editor = "vim" // default fallback
+			editor = "vim"
 		}
 
-		// Open the file in the editor
 		editorCmd := exec.Command(editor, path)
 		editorCmd.Stdin = os.Stdin
 		editorCmd.Stdout = os.Stdout
