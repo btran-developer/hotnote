@@ -17,6 +17,10 @@ var (
 	ErrWorkspaceAlreadyExists = errors.New("workspace already exists")
 	// ErrWorkspaceDoesNotExist is returned when trying to use a workspace that doesn't exist
 	ErrWorkspaceDoesNotExist = errors.New("workspace does not exist")
+	// ErrCannotDeleteCurrent is returned when trying to delete the current workspace
+	ErrCannotDeleteCurrent = errors.New("cannot delete current workspace")
+	// ErrCannotDeleteDefaultStructure is returned when trying to delete the default workspace structure
+	ErrCannotDeleteDefaultStructure = errors.New("cannot delete default workspace structure")
 )
 
 // Config represents the hotnote configuration
@@ -206,4 +210,71 @@ func (m *Manager) Current() (string, string, error) {
 	}
 	path := m.config.Workspaces[m.config.CurrentWorkspace]
 	return m.config.CurrentWorkspace, path, nil
+}
+
+// Exists checks if a workspace exists
+func (m *Manager) Exists(name string) (bool, error) {
+	if err := m.load(); err != nil {
+		return false, fmt.Errorf("workspace: load config: %w", err)
+	}
+	_, exists := m.config.Workspaces[name]
+	return exists, nil
+}
+
+// Delete removes a workspace entirely (non-default workspaces only)
+func (m *Manager) Delete(name string) error {
+	if err := m.load(); err != nil {
+		return fmt.Errorf("workspace: load config: %w", err)
+	}
+
+	workspacePath, exists := m.config.Workspaces[name]
+	if !exists {
+		return ErrWorkspaceDoesNotExist
+	}
+
+	if name == "default" {
+		return ErrCannotDeleteDefaultStructure
+	}
+
+	if name == m.config.CurrentWorkspace {
+		return ErrCannotDeleteCurrent
+	}
+
+	if err := os.RemoveAll(workspacePath); err != nil {
+		return fmt.Errorf("workspace: delete directory: %w", err)
+	}
+
+	delete(m.config.Workspaces, name)
+
+	if err := m.save(); err != nil {
+		return fmt.Errorf("workspace: save config: %w", err)
+	}
+
+	return nil
+}
+
+// ClearDefaultWorkspace removes all contents from the default workspace
+func (m *Manager) ClearDefaultWorkspace() error {
+	if err := m.load(); err != nil {
+		return fmt.Errorf("workspace: load config: %w", err)
+	}
+
+	workspacePath, exists := m.config.Workspaces["default"]
+	if !exists {
+		return ErrWorkspaceDoesNotExist
+	}
+
+	entries, err := os.ReadDir(workspacePath)
+	if err != nil {
+		return fmt.Errorf("workspace: read directory: %w", err)
+	}
+
+	for _, entry := range entries {
+		entryPath := filepath.Join(workspacePath, entry.Name())
+		if err := os.RemoveAll(entryPath); err != nil {
+			return fmt.Errorf("workspace: delete %s: %w", entry.Name(), err)
+		}
+	}
+
+	return nil
 }

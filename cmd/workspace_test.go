@@ -288,3 +288,112 @@ func TestWorkspaceJSON_ValidOutput(t *testing.T) {
 	err := json.Unmarshal([]byte(out), &data)
 	assert.NoError(t, err)
 }
+
+func TestWorkspaceDeleteJSON_NonExistent(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	out := runHotnote(t, "workspace", "delete", "nonexistent", "--json")
+
+	var response map[string]string
+	err := json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "error")
+	assert.Equal(t, "workspace not found", response["error"])
+}
+
+func TestWorkspaceDeleteJSON_DefaultWithoutForce(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	out := runHotnote(t, "workspace", "delete", "default", "--json")
+
+	var response map[string]string
+	err := json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "error")
+	assert.Equal(t, "use --force to delete", response["error"])
+}
+
+func TestWorkspaceDeleteJSON_NonDefaultCurrent(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-current-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "work"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: work\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n  work: " + filepath.Join(workspaceDir, "work") + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "delete", "work", "--force", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "error")
+	assert.Equal(t, "cannot delete current workspace: switch to another workspace first", response["error"])
+}
+
+func TestWorkspaceDeleteJSON_Success(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-delete-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "work"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: default\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n  work: " + filepath.Join(workspaceDir, "work") + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "delete", "work", "--force", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "status")
+	assert.Equal(t, "deleted", response["status"])
+	assert.Equal(t, "work", response["workspace"])
+}
+
+func TestWorkspaceDeleteDefaultJSON_WithForce(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	err := os.WriteFile(filepath.Join(configDir, "workspaces", "default", "test.md"), []byte("# Test"), 0644)
+	require.NoError(t, err)
+
+	out := runHotnote(t, "workspace", "delete", "default", "--force", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "status")
+	assert.Equal(t, "cleared", response["status"])
+	assert.Equal(t, "default", response["workspace"])
+}

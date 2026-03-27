@@ -296,7 +296,7 @@ func TestCurrent_Set(t *testing.T) {
 }
 
 func TestCurrent_NotInitialized(t *testing.T) {
-	// Create a temp config directory
+	// Create a temp config directory with empty config
 	configDir, err := os.MkdirTemp("", "hotnote-test-*")
 	require.NoError(t, err)
 	defer os.RemoveAll(configDir)
@@ -312,4 +312,181 @@ func TestCurrent_NotInitialized(t *testing.T) {
 
 	_, _, err = m.Current()
 	assert.ErrorIs(t, err, ErrWorkspaceNotInitialized)
+}
+
+func TestDelete_NonExistent(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": filepath.Join(configDir, "workspaces", "default"),
+			},
+		},
+	}
+	m.save()
+
+	err = m.Delete("nonexistent")
+	assert.ErrorIs(t, err, ErrWorkspaceDoesNotExist)
+}
+
+func TestDelete_DefaultWorkspace(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	wsPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(wsPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": wsPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Delete("default")
+	assert.ErrorIs(t, err, ErrCannotDeleteDefaultStructure)
+}
+
+func TestDelete_CurrentWorkspace(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	wsPath := filepath.Join(configDir, "workspaces", "work")
+	err = os.MkdirAll(wsPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "work",
+			Workspaces: map[string]string{
+				"default": filepath.Join(configDir, "workspaces", "default"),
+				"work":    wsPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Delete("work")
+	assert.ErrorIs(t, err, ErrCannotDeleteCurrent)
+}
+
+func TestDelete_Success(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	workPath := filepath.Join(configDir, "workspaces", "work")
+	err = os.MkdirAll(workPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": defaultPath,
+				"work":    workPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Delete("work")
+	require.NoError(t, err)
+
+	assert.NotContains(t, m.config.Workspaces, "work")
+
+	_, err = os.Stat(workPath)
+	assert.True(t, os.IsNotExist(err))
+}
+
+func TestClearDefaultWorkspace_Empty(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			Workspaces: map[string]string{
+				"default": defaultPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.ClearDefaultWorkspace()
+	require.NoError(t, err)
+
+	entries, err := os.ReadDir(defaultPath)
+	require.NoError(t, err)
+	assert.Empty(t, entries)
+}
+
+func TestClearDefaultWorkspace_WithContents(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(defaultPath, "note1.md"), []byte("# Note 1"), 0644)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(defaultPath, "note2.md"), []byte("# Note 2"), 0644)
+	require.NoError(t, err)
+
+	subDir := filepath.Join(defaultPath, "subfolder")
+	err = os.MkdirAll(subDir, 0755)
+	require.NoError(t, err)
+	err = os.WriteFile(filepath.Join(subDir, "note3.md"), []byte("# Note 3"), 0644)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			Workspaces: map[string]string{
+				"default": defaultPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.ClearDefaultWorkspace()
+	require.NoError(t, err)
+
+	entries, err := os.ReadDir(defaultPath)
+	require.NoError(t, err)
+	assert.Empty(t, entries)
+
+	_, err = os.Stat(defaultPath)
+	assert.NoError(t, err)
 }

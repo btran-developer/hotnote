@@ -1,10 +1,12 @@
 package cmd
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/spf13/cobra"
 	exitorrors "hotnotego/internal/errors"
@@ -211,10 +213,154 @@ var workspaceNewCmd = &cobra.Command{
 	},
 }
 
+var workspaceDeleteCmd = &cobra.Command{
+	Use:   "delete <name>",
+	Short: "Delete a workspace or clear default workspace contents",
+	Long: `Delete a workspace entirely, or clear contents of the default workspace.
+
+For non-default workspaces:
+  - Deletes the workspace directory and all contents
+  - Removes the workspace from configuration
+  - Cannot delete the currently active workspace (switch first)
+
+For the default workspace:
+  - Clears all contents (files and folders) within the workspace
+  - Preserves the workspace structure and configuration
+  - Can be used even when default is the current workspace
+
+Examples:
+  hotnote workspace delete work              # Delete 'work' workspace
+  hotnote workspace delete default           # Clear all contents in default
+  hotnote workspace delete work --force      # Skip confirmation prompt`,
+	Args: cobra.MinimumNArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		name := args[0]
+
+		wm, err := workspace.NewManager()
+		if err != nil {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+			} else {
+				fmt.Printf("create workspace manager: %v\n", err)
+			}
+			os.Exit(exitorrors.ExitGeneral)
+		}
+
+		isDefault := name == "default"
+
+		if isDefault {
+			if !workspaceDeleteForce && jsonFlag {
+				outputJSONError("use --force to delete")
+				os.Exit(exitorrors.ExitGeneral)
+			}
+
+			if !workspaceDeleteForce {
+				fmt.Printf("Clear all contents in default workspace? [y/N]: ")
+				reader := bufio.NewReader(os.Stdin)
+				input, err := reader.ReadString('\n')
+				if err != nil {
+					os.Exit(exitorrors.ExitGeneral)
+				}
+				input = strings.TrimSpace(input)
+				if input != "y" && input != "Y" {
+					os.Exit(exitorrors.ExitGeneral)
+				}
+				fmt.Println("Note: The default workspace structure will remain")
+			}
+
+			if err := wm.ClearDefaultWorkspace(); err != nil {
+				if jsonFlag {
+					outputJSONError(fmt.Sprintf("clear default workspace: %v", err))
+				} else {
+					fmt.Printf("clear default workspace: %v\n", err)
+				}
+				os.Exit(exitorrors.ExitGeneral)
+			}
+
+			if jsonFlag {
+				response := map[string]string{
+					"status":    "cleared",
+					"workspace": "default",
+				}
+				outputJSON(response)
+			} else {
+				fmt.Println("Cleared default workspace")
+			}
+		} else {
+			exists, err := wm.Exists(name)
+			if err != nil {
+				if jsonFlag {
+					outputJSONError(fmt.Sprintf("check workspace: %v", err))
+				} else {
+					fmt.Printf("check workspace: %v\n", err)
+				}
+				os.Exit(exitorrors.ExitGeneral)
+			}
+			if !exists {
+				if jsonFlag {
+					outputJSONError("workspace not found")
+				} else {
+					fmt.Println("workspace not found")
+				}
+				os.Exit(exitorrors.ExitNotFound)
+			}
+
+			if !workspaceDeleteForce && jsonFlag {
+				outputJSONError("use --force to delete")
+				os.Exit(exitorrors.ExitGeneral)
+			}
+
+			if !workspaceDeleteForce {
+				fmt.Printf("Delete workspace '%s'? [y/N]: ", name)
+				reader := bufio.NewReader(os.Stdin)
+				input, err := reader.ReadString('\n')
+				if err != nil {
+					os.Exit(exitorrors.ExitGeneral)
+				}
+				input = strings.TrimSpace(input)
+				if input != "y" && input != "Y" {
+					os.Exit(exitorrors.ExitGeneral)
+				}
+			}
+
+			if err := wm.Delete(name); err != nil {
+				if errors.Is(err, workspace.ErrCannotDeleteCurrent) {
+					if jsonFlag {
+						outputJSONError("cannot delete current workspace: switch to another workspace first")
+					} else {
+						fmt.Println("cannot delete current workspace: switch to another workspace first")
+					}
+					os.Exit(exitorrors.ExitInvalidInput)
+				}
+				if jsonFlag {
+					outputJSONError(fmt.Sprintf("delete workspace: %v", err))
+				} else {
+					fmt.Printf("delete workspace: %v\n", err)
+				}
+				os.Exit(exitorrors.ExitGeneral)
+			}
+
+			if jsonFlag {
+				response := map[string]string{
+					"status":    "deleted",
+					"workspace": name,
+				}
+				outputJSON(response)
+			} else {
+				fmt.Printf("Deleted workspace: %s\n", name)
+			}
+		}
+	},
+}
+
+var workspaceDeleteForce bool
+
 func init() {
 	workspaceCmd.AddCommand(workspaceInitCmd)
 	workspaceCmd.AddCommand(workspaceListCmd)
 	workspaceCmd.AddCommand(workspaceUseCmd)
 	workspaceCmd.AddCommand(workspaceNewCmd)
+	workspaceCmd.AddCommand(workspaceDeleteCmd)
+	workspaceDeleteCmd.Flags().BoolVar(&workspaceDeleteForce, "force", false, "Skip confirmation prompt")
 	RootCmd.AddCommand(workspaceCmd)
 }

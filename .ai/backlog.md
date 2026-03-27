@@ -54,19 +54,19 @@
 - [x] JSON output support
 
 ### Issue H: workspace delete Command
-- [ ] Add `workspaceDeleteCmd` to `cmd/workspace.go`
-- [ ] `hotnote workspace delete <name>` deletes workspace
-- [ ] Add `Delete(name string, force bool) error` to `workspace.Manager`
-- [ ] Recursively delete workspace directory and all contents
-- [ ] Confirmation prompt by default
-- [ ] `--force` flag to skip prompt
-- [ ] Safety checks (current, last workspace)
+- [x] Add `workspaceDeleteCmd` to `cmd/workspace.go`
+- [x] `hotnote workspace delete <name>` deletes workspace
+- [x] Add `Delete(name string) error` to `workspace.Manager`
+- [x] Recursively delete workspace directory and all contents
+- [x] Confirmation prompt by default
+- [x] `--force` flag to skip prompt
+- [x] Safety checks (current, default workspace)
 
 ### Issue I: Unit Tests
 - [x] Test hybrid path resolution
 - [x] Test `Store.Delete()`, `Store.Rename()`, `Store.List()`
-- [ ] Test `workspace.Manager.Delete()`
-- [ ] Test all new commands
+- [x] Test `workspace.Manager.Delete()`
+- [x] Test all new commands
 - [ ] Test safety checks
 - [ ] Test conflict resolution
 
