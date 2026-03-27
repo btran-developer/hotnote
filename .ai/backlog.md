@@ -110,6 +110,42 @@
 - [ ] Display creation time in list output
 - [ ] Document behavior in commands.md
 
+### Issue O: CLI Command Restructure - Breaking Changes
+- [ ] Refactor `mkdir` → `folder make` with `mk` alias
+- [ ] Refactor `rmdir` → `folder remove` with `rmv` alias
+- [ ] Add aliases to existing commands:
+  - [ ] `list` → `ls`
+  - [ ] `delete` → `del`
+  - [ ] `open` → `opn`
+  - [ ] `render` → `rdr`
+  - [ ] `rename` → `rn`
+  - [ ] `folder rename` → `rn`
+  - [ ] `workspace list` → `workspace ls`
+  - [ ] `workspace delete` → `workspace del`
+- [ ] Delete old `cmd/mkdir.go` and `cmd/rmdir.go` files
+- [ ] Update all test files to use new command names
+- [ ] Add tests for alias functionality
+- [ ] Update `docs/features/commands.md`:
+  - [ ] Document new `folder` subcommand structure
+  - [ ] Add alias information to all commands
+  - [ ] Update examples with new syntax
+- [ ] Update `docs/architecture/overview.md` command table
+- [ ] Update `docs/index.md` quick reference
+- [ ] Update `.ai/phase1/hotnote_cli_spec.md` with new command structure
+
+### Issue P: Add folder list Command
+- [ ] Create `cmd/folder_list.go` with `folder list [path]` command
+- [ ] Support optional path argument (defaults to current directory)
+- [ ] List all files and folders in specified path
+- [ ] JSON output: array of objects with `name`, `path`, `type` fields
+- [ ] Human output: tree-like format showing files and folders
+- [ ] Add `ls` alias for `folder list`
+- [ ] Handle errors: invalid path, path outside workspace, workspace not initialized
+- [ ] Unit tests for folder list command
+- [ ] Integration tests with JSON and human output
+- [ ] Update documentation in `docs/features/commands.md`
+- [ ] Update AI agent spec if needed
+
 ---
 
 ### Legacy: CLI (Phase 1) - Original

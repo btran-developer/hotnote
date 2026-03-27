@@ -89,12 +89,12 @@ Uses [Cobra](https://github.com/spf13/cobra) for command-line parsing. Each comm
 | Command | File | Purpose |
 |---------|------|---------|
 | `hotnote new` | `new.go` | Create a new note |
-| `hotnote list` | `list.go` | List all notes |
-| `hotnote open` | `open.go` | Open note in `$EDITOR` |
-| `hotnote render` | `render.go` | Render markdown to HTML |
-| `hotnote mkdir` | `mkdir.go` | Create a folder |
-| `hotnote rmdir` | `rmdir.go` | Delete a folder |
-| `hotnote delete` | `delete.go` | Delete a note |
+| `hotnote list` | `list.go` | List all notes (alias: `ls`) |
+| `hotnote open` | `open.go` | Open note in `$EDITOR` (alias: `opn`) |
+| `hotnote render` | `render.go` | Render markdown to HTML (alias: `rdr`) |
+| `hotnote folder` | `folder.go` | Folder management (make, remove, list, rename) |
+| `hotnote delete` | `delete.go` | Delete a note (alias: `del`) |
+| `hotnote rename` | `rename.go` | Rename a note (alias: `rn`) |
 | `hotnote workspace` | `workspace.go` | Manage workspaces |
 | `hotnote ai` | `ai.go` | AI operations (stub) |
 
