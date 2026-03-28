@@ -142,19 +142,14 @@ func init() {
 }
 
 func computeNewSlug(resolvedSlug, newTitle string) string {
+	newSlug := slugifypkg.SlugifyPath(newTitle)
 	if strings.Contains(newTitle, "/") {
-		parts := strings.Split(newTitle, "/")
-		for i := range parts {
-			parts[i] = slugifypkg.Slugify(parts[i])
-		}
-		return strings.Join(parts, "/")
+		return newSlug
 	}
-
-	oldBase := slugifypkg.Slugify(newTitle)
 	if !strings.Contains(resolvedSlug, "/") {
-		return oldBase
+		return newSlug
 	}
 
 	folder := resolvedSlug[:strings.LastIndex(resolvedSlug, "/")]
-	return folder + "/" + oldBase
+	return folder + "/" + newSlug
 }

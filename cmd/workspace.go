@@ -10,6 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 	exitorrors "hotnotego/internal/errors"
+	slugifypkg "hotnotego/internal/slugify"
 	"hotnotego/internal/workspace"
 )
 
@@ -123,9 +124,18 @@ var workspaceListCmd = &cobra.Command{
 var workspaceUseCmd = &cobra.Command{
 	Use:   "use <name>",
 	Short: "Switch to a workspace",
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		name := args[0]
+		name := slugifypkg.Slugify(args[0])
+		if name == "" {
+			if jsonFlag {
+				outputJSONError("invalid workspace name: produces empty slug")
+			} else {
+				fmt.Println("invalid workspace name: produces empty slug")
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
+
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
@@ -172,9 +182,17 @@ var workspaceNewCmd = &cobra.Command{
 			} else {
 				fmt.Println("workspace name required")
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitInvalidInput)
 		}
-		name := args[0]
+		name := slugifypkg.Slugify(args[0])
+		if name == "" {
+			if jsonFlag {
+				outputJSONError("invalid workspace name: produces empty slug")
+			} else {
+				fmt.Println("invalid workspace name: produces empty slug")
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
 
 		wm, err := workspace.NewManager()
 		if err != nil {
@@ -230,9 +248,17 @@ Examples:
   hotnote workspace delete default           # Clear all contents in default
   hotnote workspace delete work --force      # Skip confirmation prompt`,
 	Aliases: []string{"del"},
-	Args:    cobra.MinimumNArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		name := args[0]
+		name := slugifypkg.Slugify(args[0])
+		if name == "" {
+			if jsonFlag {
+				outputJSONError("invalid workspace name: produces empty slug")
+			} else {
+				fmt.Println("invalid workspace name: produces empty slug")
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
 
 		wm, err := workspace.NewManager()
 		if err != nil {
@@ -357,8 +383,16 @@ var workspaceRenameCmd = &cobra.Command{
 	Aliases: []string{"rn"},
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		oldName := args[0]
-		newName := args[1]
+		oldName := slugifypkg.Slugify(args[0])
+		newName := slugifypkg.Slugify(args[1])
+		if newName == "" {
+			if jsonFlag {
+				outputJSONError("invalid workspace name: produces empty slug")
+			} else {
+				fmt.Println("invalid workspace name: produces empty slug")
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
 
 		wm, err := workspace.NewManager()
 		if err != nil {

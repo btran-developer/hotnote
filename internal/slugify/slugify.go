@@ -1,6 +1,8 @@
 package slugify
 
-import "strings"
+import (
+	"strings"
+)
 
 func Slugify(s string) string {
 	s = strings.ToLower(s)
@@ -17,4 +19,19 @@ func Slugify(s string) string {
 	}
 	s = strings.Trim(s, "-")
 	return s
+}
+
+func SlugifyPath(path string) string {
+	if path == "" {
+		return ""
+	}
+	parts := strings.Split(path, "/")
+	var result []string
+	for _, part := range parts {
+		slugged := Slugify(part)
+		if slugged != "" {
+			result = append(result, slugged)
+		}
+	}
+	return strings.Join(result, "/")
 }

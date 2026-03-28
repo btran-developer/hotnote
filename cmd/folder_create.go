@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 	exitorrors "hotnotego/internal/errors"
 	"hotnotego/internal/pathutil"
+	slugifypkg "hotnotego/internal/slugify"
 	"hotnotego/internal/workspace"
 )
 
@@ -15,9 +16,17 @@ var folderCreateCmd = &cobra.Command{
 	Use:     "create <folder>",
 	Short:   "Create a folder in the current workspace",
 	Aliases: []string{"new", "cr"},
-	Args:    cobra.MinimumNArgs(1),
+	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		folder := args[0]
+		folder := slugifypkg.SlugifyPath(args[0])
+		if folder == "" {
+			if jsonFlag {
+				outputJSONError("invalid folder name: produces empty slug")
+			} else {
+				fmt.Println("invalid folder name: produces empty slug")
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
 
 		wm, err := workspace.NewManager()
 		if err != nil {

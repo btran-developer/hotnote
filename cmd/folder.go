@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	exitorrors "hotnotego/internal/errors"
 	"hotnotego/internal/pathutil"
+	slugifypkg "hotnotego/internal/slugify"
 	"hotnotego/internal/workspace"
 )
 
@@ -24,7 +25,15 @@ var folderRenameCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		oldFolder := args[0]
-		newFolder := args[1]
+		newFolder := slugifypkg.SlugifyPath(args[1])
+		if newFolder == "" {
+			if jsonFlag {
+				outputJSONError("invalid folder name: produces empty slug")
+			} else {
+				fmt.Println("invalid folder name: produces empty slug")
+			}
+			os.Exit(exitorrors.ExitInvalidInput)
+		}
 
 		wm, err := workspace.NewManager()
 		if err != nil {

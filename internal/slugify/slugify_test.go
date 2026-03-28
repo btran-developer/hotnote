@@ -96,3 +96,64 @@ func TestSlugify_Basic(t *testing.T) {
 		})
 	}
 }
+
+func TestSlugifyPath(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "simple path",
+			input:    "my projects",
+			expected: "my-projects",
+		},
+		{
+			name:     "nested path",
+			input:    "my projects/2024 q1",
+			expected: "my-projects/2024-q1",
+		},
+		{
+			name:     "deeply nested",
+			input:    "a/b/c/d/e",
+			expected: "a/b/c/d/e",
+		},
+		{
+			name:     "nested with spaces and uppercase",
+			input:    "Hello World/Note 123/Test!@#",
+			expected: "hello-world/note-123/test",
+		},
+		{
+			name:     "single segment with slashes",
+			input:    "a///b///c",
+			expected: "a/b/c",
+		},
+		{
+			name:     "empty segments",
+			input:    "/a/b/",
+			expected: "a/b",
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "already valid slugs",
+			input:    "projects/2024-q1/notes",
+			expected: "projects/2024-q1/notes",
+		},
+		{
+			name:     "trailing slash",
+			input:    "folder/",
+			expected: "folder",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := SlugifyPath(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
