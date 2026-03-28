@@ -12,16 +12,17 @@ import (
 )
 
 const (
-	PendingActionSwitchWorkspace = "switch_workspace"
-	PendingActionSwitchMain      = "switch_main"
-	PendingTimeoutSeconds        = 3
+	PendingActionSwitchWorkspace = "switch_workspace" // PendingActionSwitchWorkspace indicates a pending workspace switch.
+	PendingActionSwitchMain      = "switch_main"      // PendingActionSwitchMain indicates a pending main view switch.
+	PendingTimeoutSeconds        = 3                  // PendingTimeoutSeconds is the timeout for pending actions.
 
-	StatusDefaultWorkspace = "view: workspaces · Esc: switch · Tab: switch · ?: help"
-	StatusDefaultMain      = "view: main · Esc: switch · Tab: switch · ?: help"
-	StatusToMain           = "Esc: to main · Tab: switch · ?: help"
-	StatusToWorkspace      = "Esc: to workspaces · Tab: switch · ?: help"
+	StatusDefaultWorkspace = "view: workspaces · Esc: switch · Tab: switch · ?: help" // StatusDefaultWorkspace is the default status in workspace view.
+	StatusDefaultMain      = "view: main · Esc: switch · Tab: switch · ?: help"       // StatusDefaultMain is the default status in main view.
+	StatusToMain           = "Esc: to main · Tab: switch · ?: help"                   // StatusToMain is the status when switching to main view.
+	StatusToWorkspace      = "Esc: to workspaces · Tab: switch · ?: help"             // StatusToWorkspace is the status when switching to workspace view.
 )
 
+// App is the main TUI application.
 type App struct {
 	*tview.Application
 	workspaceMgr *workspace.Manager
@@ -43,6 +44,7 @@ type App struct {
 	pendingTimer  *time.Timer
 }
 
+// New creates a new TUI application.
 func New() (*App, error) {
 	mgr, err := workspace.NewManager()
 	if err != nil {
@@ -397,6 +399,7 @@ func (a *App) focusPreview() {
 	}
 }
 
+// Run starts the TUI application.
 func (a *App) Run() error {
 	return a.Application.Run()
 }

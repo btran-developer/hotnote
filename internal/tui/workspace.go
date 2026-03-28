@@ -10,6 +10,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// WorkspaceSelector is a list widget for selecting workspaces.
 type WorkspaceSelector struct {
 	*tview.List
 	workspaces []workspaceEntry
@@ -58,6 +59,7 @@ func sortWorkspaces(workspaces map[string]string, current string) []workspaceEnt
 	return entries
 }
 
+// NewWorkspaceSelector creates a new workspace selector widget.
 func NewWorkspaceSelector(
 	entries []workspaceEntry,
 	current string,
@@ -135,6 +137,7 @@ func (w *WorkspaceSelector) handleInputCapture(event *tcell.EventKey) *tcell.Eve
 	return event
 }
 
+// HandleKey handles key events for the workspace selector.
 func (w *WorkspaceSelector) HandleKey(event *tcell.EventKey) bool {
 	if event.Key() == tcell.KeyEscape {
 		w.onCancel()

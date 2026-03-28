@@ -4,38 +4,40 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// KeyContext represents the context in which key bindings are active.
 type KeyContext string
 
 const (
-	ContextGlobal  KeyContext = "global"
-	ContextTree    KeyContext = "tree"
-	ContextPreview KeyContext = "preview"
-	ContextEditor  KeyContext = "editor"
+	ContextGlobal  KeyContext = "global"  // ContextGlobal is the default context.
+	ContextTree    KeyContext = "tree"    // ContextTree is active when the file tree has focus.
+	ContextPreview KeyContext = "preview" // ContextPreview is active when the preview pane has focus.
+	ContextEditor  KeyContext = "editor"  // ContextEditor is active when the text editor has focus.
 )
 
+// KeyAction represents an action triggered by a key binding.
 type KeyAction string
 
 const (
-	ActionSwitchPane   KeyAction = "switch_pane"
-	ActionQuit         KeyAction = "quit"
-	ActionHelp         KeyAction = "help"
-	ActionCancel       KeyAction = "cancel"
-	ActionScrollUp     KeyAction = "scroll_up"
-	ActionScrollDown   KeyAction = "scroll_down"
-	ActionExpandOpen   KeyAction = "expand_open"
-	ActionMoveUp       KeyAction = "move_up"
-	ActionMoveDown     KeyAction = "move_down"
-	ActionExternalEdit KeyAction = "external_edit"
-	ActionNewNote      KeyAction = "new_note"
-	ActionNewFolder    KeyAction = "new_folder"
-	ActionDelete       KeyAction = "delete"
-	ActionRename       KeyAction = "rename"
-	ActionRefresh      KeyAction = "refresh"
-	ActionToggleRaw    KeyAction = "toggle_raw"
-	ActionEnterEdit    KeyAction = "enter_edit"
-	ActionSave         KeyAction = "save"
-	ActionEditorQuit   KeyAction = "editor_quit"
-	ActionTabIndent    KeyAction = "tab_indent"
+	ActionSwitchPane   KeyAction = "switch_pane"   // ActionSwitchPane switches focus between panels.
+	ActionQuit         KeyAction = "quit"          // ActionQuit exits the application.
+	ActionHelp         KeyAction = "help"          // ActionHelp shows help information.
+	ActionCancel       KeyAction = "cancel"        // ActionCancel cancels the current operation.
+	ActionScrollUp     KeyAction = "scroll_up"     // ActionScrollUp scrolls up.
+	ActionScrollDown   KeyAction = "scroll_down"   // ActionScrollDown scrolls down.
+	ActionExpandOpen   KeyAction = "expand_open"   // ActionExpandOpen expands or opens a folder.
+	ActionMoveUp       KeyAction = "move_up"       // ActionMoveUp moves selection up.
+	ActionMoveDown     KeyAction = "move_down"     // ActionMoveDown moves selection down.
+	ActionExternalEdit KeyAction = "external_edit" // ActionExternalEdit opens the note in an external editor.
+	ActionNewNote      KeyAction = "new_note"      // ActionNewNote creates a new note.
+	ActionNewFolder    KeyAction = "new_folder"    // ActionNewFolder creates a new folder.
+	ActionDelete       KeyAction = "delete"        // ActionDelete deletes the selected item.
+	ActionRename       KeyAction = "rename"        // ActionRename renames the selected item.
+	ActionRefresh      KeyAction = "refresh"       // ActionRefresh refreshes the current view.
+	ActionToggleRaw    KeyAction = "toggle_raw"    // ActionToggleRaw toggles raw/preview mode.
+	ActionEnterEdit    KeyAction = "enter_edit"    // ActionEnterEdit enters edit mode.
+	ActionSave         KeyAction = "save"          // ActionSave saves the current content.
+	ActionEditorQuit   KeyAction = "editor_quit"   // ActionEditorQuit quits the editor.
+	ActionTabIndent    KeyAction = "tab_indent"    // ActionTabIndent inserts a tab or indentation.
 )
 
 type keyBinding struct {
@@ -44,6 +46,7 @@ type keyBinding struct {
 	action KeyAction
 }
 
+// Keymaps maps each KeyContext to its list of key bindings.
 var Keymaps = map[KeyContext][]keyBinding{
 	ContextGlobal: {
 		{key: tcell.KeyCtrlQ, action: ActionQuit},
@@ -93,6 +96,7 @@ var Keymaps = map[KeyContext][]keyBinding{
 	},
 }
 
+// MatchKey returns the KeyAction for the given context and key event.
 func MatchKey(ctx KeyContext, event *tcell.EventKey) (KeyAction, bool) {
 	bindings, exists := Keymaps[ctx]
 	if !exists {

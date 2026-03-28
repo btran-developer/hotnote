@@ -1,3 +1,4 @@
+// Package workspace manages multi-workspace configuration.
 package workspace
 
 import (
@@ -27,10 +28,10 @@ var (
 	ErrEmptyWorkspaceName = errors.New("workspace name cannot be empty")
 )
 
-// Config represents the hotnote configuration
+// Config represents the hotnote configuration.
 type Config struct {
-	CurrentWorkspace string            `yaml:"current_workspace"`
-	Workspaces       map[string]string `yaml:"workspaces"`
+	CurrentWorkspace string            `yaml:"current_workspace"` // CurrentWorkspace is the name of the active workspace.
+	Workspaces       map[string]string `yaml:"workspaces"`        // Workspaces maps workspace names to their filesystem paths.
 }
 
 // Manager handles workspace operations

@@ -5,37 +5,42 @@ import (
 	"github.com/rivo/tview"
 )
 
+// Palette defines the color scheme for the TUI.
 type Palette struct {
-	Black   tcell.Color
-	Red     tcell.Color
-	Green   tcell.Color
-	Yellow  tcell.Color
-	Blue    tcell.Color
-	Magenta tcell.Color
-	Cyan    tcell.Color
-	White   tcell.Color
+	// Standard colors (0-7)
+	Black   tcell.Color // Black is the standard black color.
+	Red     tcell.Color // Red is the standard red color.
+	Green   tcell.Color // Green is the standard green color.
+	Yellow  tcell.Color // Yellow is the standard yellow color.
+	Blue    tcell.Color // Blue is the standard blue color.
+	Magenta tcell.Color // Magenta is the standard magenta color.
+	Cyan    tcell.Color // Cyan is the standard cyan color.
+	White   tcell.Color // White is the standard white color.
 
-	BrightBlack   tcell.Color
-	BrightRed     tcell.Color
-	BrightGreen   tcell.Color
-	BrightYellow  tcell.Color
-	BrightBlue    tcell.Color
-	BrightMagenta tcell.Color
-	BrightCyan    tcell.Color
-	BrightWhite   tcell.Color
+	// Bright colors (8-15)
+	BrightBlack   tcell.Color // BrightBlack is the bright black color.
+	BrightRed     tcell.Color // BrightRed is the bright red color.
+	BrightGreen   tcell.Color // BrightGreen is the bright green color.
+	BrightYellow  tcell.Color // BrightYellow is the bright yellow color.
+	BrightBlue    tcell.Color // BrightBlue is the bright blue color.
+	BrightMagenta tcell.Color // BrightMagenta is the bright magenta color.
+	BrightCyan    tcell.Color // BrightCyan is the bright cyan color.
+	BrightWhite   tcell.Color // BrightWhite is the bright white color.
 
-	Error      tcell.Color
-	Warning    tcell.Color
-	Success    tcell.Color
-	Info       tcell.Color
-	Border     tcell.Color
-	Title      tcell.Color
-	Accent     tcell.Color
-	Dim        tcell.Color
-	Background tcell.Color
-	Primary    tcell.Color
+	// Semantic colors
+	Error      tcell.Color // Error is the color for error messages.
+	Warning    tcell.Color // Warning is the color for warnings.
+	Success    tcell.Color // Success is the color for success messages.
+	Info       tcell.Color // Info is the color for informational messages.
+	Border     tcell.Color // Border is the color for borders.
+	Title      tcell.Color // Title is the color for titles.
+	Accent     tcell.Color // Accent is the color for accents.
+	Dim        tcell.Color // Dim is the color for dimmed text.
+	Background tcell.Color // Background is the background color.
+	Primary    tcell.Color // Primary is the primary accent color.
 }
 
+// DefaultPalette is the default color palette.
 var DefaultPalette = Palette{
 	Black:   tcell.PaletteColor(0),
 	Red:     tcell.PaletteColor(1),
@@ -67,6 +72,7 @@ var DefaultPalette = Palette{
 	Primary:    tcell.PaletteColor(4),
 }
 
+// Apply applies the default palette to tview styles.
 func Apply() {
 	tview.Styles = tview.Theme{
 		PrimitiveBackgroundColor:    tcell.ColorDefault,

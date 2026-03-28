@@ -141,6 +141,7 @@ func init() {
 	RootCmd.AddCommand(renameCmd)
 }
 
+// computeNewSlug derives the new slug from the resolved slug and new title.
 func computeNewSlug(resolvedSlug, newTitle string) string {
 	newSlug := slugifypkg.SlugifyPath(newTitle)
 	if strings.Contains(newTitle, "/") {

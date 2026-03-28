@@ -7,11 +7,13 @@ import (
 	"github.com/rivo/tview"
 )
 
+// PreviewPane displays markdown preview of notes.
 type PreviewPane struct {
 	*tview.TextView
 	currentFile string
 }
 
+// NewPreviewPane creates a new preview pane.
 func NewPreviewPane() *PreviewPane {
 	p := &PreviewPane{
 		TextView:    tview.NewTextView(),
@@ -28,6 +30,7 @@ func NewPreviewPane() *PreviewPane {
 	return p
 }
 
+// LoadNote loads a note file into the preview pane.
 func (p *PreviewPane) LoadNote(path string) error {
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -40,11 +43,13 @@ func (p *PreviewPane) LoadNote(path string) error {
 	return nil
 }
 
+// Clear clears the preview pane.
 func (p *PreviewPane) Clear() {
 	p.currentFile = ""
 	p.SetText("")
 }
 
+// GetCurrentFile returns the path of the currently loaded file.
 func (p *PreviewPane) GetCurrentFile() string {
 	return p.currentFile
 }

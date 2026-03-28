@@ -1,3 +1,4 @@
+// Package fsutil provides atomic file write operations.
 package fsutil
 
 import (
@@ -6,6 +7,7 @@ import (
 	"path/filepath"
 )
 
+// AtomicWrite writes data to path atomically using a temp file rename.
 func AtomicWrite(path string, data []byte, perm os.FileMode) error {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
@@ -46,6 +48,7 @@ func AtomicWrite(path string, data []byte, perm os.FileMode) error {
 	return nil
 }
 
+// AtomicWriteExclusive writes data atomically, failing if path already exists.
 func AtomicWriteExclusive(path string, data []byte, perm os.FileMode) error {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {

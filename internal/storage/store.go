@@ -1,3 +1,4 @@
+// Package storage manages note files on disk.
 package storage
 
 import (
@@ -12,24 +13,33 @@ import (
 )
 
 var (
+	// ErrWorkspaceNotInitialized is returned when no workspace is set.
 	ErrWorkspaceNotInitialized = errors.New("workspace not initialized")
-	ErrNoteNotFound            = errors.New("note not found")
-	ErrMultipleMatches         = errors.New("multiple notes match slug")
-	ErrNoteAlreadyExists       = errors.New("note already exists")
+	// ErrNoteNotFound is returned when a note slug does not match any file.
+	ErrNoteNotFound = errors.New("note not found")
+	// ErrMultipleMatches is returned when a slug is ambiguous.
+	ErrMultipleMatches = errors.New("multiple notes match slug")
+	// ErrNoteAlreadyExists is returned when trying to create a note that already exists.
+	ErrNoteAlreadyExists = errors.New("note already exists")
 )
 
+// WorkspaceManager provides access to the current workspace.
 type WorkspaceManager interface {
+	// Current returns the name and filesystem path of the active workspace.
 	Current() (name string, path string, err error)
 }
 
+// Store manages note files within a workspace.
 type Store struct {
 	wm WorkspaceManager
 }
 
+// NewStore creates a Store using the given WorkspaceManager.
 func NewStore(wm WorkspaceManager) *Store {
 	return &Store{wm: wm}
 }
 
+// Path returns the filesystem path for note id.
 func (s *Store) Path(id string) (string, error) {
 	_, workspacePath, err := s.wm.Current()
 	if err != nil {
@@ -38,6 +48,7 @@ func (s *Store) Path(id string) (string, error) {
 	return filepath.Join(workspacePath, id+".md"), nil
 }
 
+// Ensure writes content for note id, creating the file if it doesn't exist.
 func (s *Store) Ensure(id string, content []byte) error {
 	id = strings.TrimSuffix(id, ".md")
 	path, err := s.Path(id)
@@ -50,12 +61,14 @@ func (s *Store) Ensure(id string, content []byte) error {
 	return nil
 }
 
+// NoteInfo holds metadata about a stored note.
 type NoteInfo struct {
-	Slug    string
-	RelPath string
-	ModTime time.Time
+	Slug    string    // Slug is the URL-safe identifier derived from the filename.
+	RelPath string    // RelPath is the path relative to the workspace root.
+	ModTime time.Time // ModTime is the last content modification time.
 }
 
+// List returns all notes in the current workspace.
 func (s *Store) List() ([]NoteInfo, error) {
 	_, workspacePath, err := s.wm.Current()
 	if err != nil {
@@ -96,6 +109,7 @@ func (s *Store) List() ([]NoteInfo, error) {
 	return notes, nil
 }
 
+// Delete removes the note file for id.
 func (s *Store) Delete(id string) error {
 	id = strings.TrimSuffix(id, ".md")
 	path, err := s.Path(id)
@@ -108,6 +122,7 @@ func (s *Store) Delete(id string) error {
 	return nil
 }
 
+// Rename moves a note from oldID to newID.
 func (s *Store) Rename(oldID, newID string) error {
 	oldID = strings.TrimSuffix(oldID, ".md")
 	newID = strings.TrimSuffix(newID, ".md")
@@ -141,6 +156,7 @@ func (s *Store) Rename(oldID, newID string) error {
 	return nil
 }
 
+// Resolve resolves input to a unique note slug.
 func (s *Store) Resolve(input string) (string, error) {
 	if strings.Contains(input, "/") {
 		slug := strings.TrimSuffix(input, ".md")

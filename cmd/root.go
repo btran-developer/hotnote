@@ -1,3 +1,4 @@
+// Package cmd defines the CLI commands for hotnote.
 package cmd
 
 import (
@@ -9,6 +10,7 @@ import (
 	exitorrors "hotnotego/internal/errors"
 )
 
+// RootCmd is the top-level Cobra command for hotnote.
 var RootCmd = &cobra.Command{
 	Use:     "hotnote",
 	Short:   "A terminal-first markdown note system",
@@ -20,6 +22,7 @@ var dataDir string
 var jsonFlag bool
 var prettyFlag bool
 
+// Execute runs the root command and exits on error.
 func Execute() {
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)

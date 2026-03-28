@@ -8,12 +8,14 @@ import (
 	"github.com/rivo/tview"
 )
 
+// TreeView displays a file tree with markdown notes.
 type TreeView struct {
 	*tview.TreeView
 	rootPath     string
 	onFileSelect func(string)
 }
 
+// NewTreeView creates a new tree view for the given root directory.
 func NewTreeView(root string, onFileSelect func(string)) *TreeView {
 	tv := &TreeView{
 		TreeView:     tview.NewTreeView(),

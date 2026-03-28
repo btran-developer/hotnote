@@ -5,10 +5,12 @@ import (
 	"github.com/rivo/tview"
 )
 
+// StatusBar displays status information at the bottom of the TUI.
 type StatusBar struct {
 	*tview.TextView
 }
 
+// NewStatusBar creates a new status bar.
 func NewStatusBar() *StatusBar {
 	sb := &StatusBar{
 		TextView: tview.NewTextView(),
@@ -23,6 +25,7 @@ func NewStatusBar() *StatusBar {
 	return sb
 }
 
+// SetStatus sets the status bar text.
 func (sb *StatusBar) SetStatus(text string) {
 	sb.TextView.SetText(text)
 }

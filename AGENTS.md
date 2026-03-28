@@ -24,9 +24,36 @@
 - Sentinel: `var ErrNotFound = errors.New("not found")`
 
 ## Comments
-- Package: file-level before package
-- Exports: complete sentences
-- Inline: sparse; explain why- TODO: `// TODO(owner): desc`
+
+Comments are written **with** the code, not after. Treat doc comments like tests —
+every new exported symbol, sentinel error, and interface requires a doc comment
+before the change is complete.
+
+### Format Reference
+
+| Artifact | Format | Example |
+|----------|--------|---------|
+| Package | `// Package <name> provides <summary>.` | `// Package storage provides atomic note file storage.` |
+| Exported type | `// <Name> <verb>s ...` | `// Store manages note files on disk.` |
+| Exported func | `// <Func> <verb>s ...` | `// NewStore creates a Store using the given WorkspaceManager.` |
+| Interface | `// <I> <verb>s ...` + method docs | `// WorkspaceManager provides access to the active workspace.` |
+| Interface method | `// <Method> <verb>s ...` | `// Current returns the name and path of the active workspace.` |
+| Sentinel error | `// Err<X> is returned when <condition>.` | `// ErrNotFound is returned when the note does not exist.` |
+| Constant | `// <Const> <verb>s ...` | `// ViewModeTree indicates the file tree panel has focus.` |
+| Struct field | `// <Field> <verb>s ...` | `// Slug is the URL-safe identifier derived from the filename.` |
+| Unexported func | `// <func> <verb>s ...` | `// load reads the configuration from disk.` |
+| Inline | sparse; explain *why*, not *what* | `// Retry once for transient lock conflicts.` |
+| TODO | `// TODO(owner): description` | `// TODO(btran): add batch delete support` |
+
+### Comment Checklist (per code change)
+
+- [ ] New package has a `// Package` comment in its primary file
+- [ ] All new exported types, functions, and methods have doc comments
+- [ ] New sentinel errors document when they are returned
+- [ ] New interfaces and their methods are documented
+- [ ] Non-obvious exported constants have doc comments
+- [ ] Complex unexported functions have doc comments
+- [ ] Inline comments explain *why*, not *what*
 
 ## Performance
 - Pre-allocate when size known
@@ -41,7 +68,9 @@
 - Do not leave test data in user directories (~/.config, ~/.local)
 
 ## Verification
+- Run `go vet ./...` to catch basic issues
 - Run `go test -v ./...` before committing
+- Review doc comments as part of code review — same rigor as test coverage
 - For manual CLI verification, clean up after:
   - Config files: `rm -f ~/.config/hotnote/config.yaml`
   - Workspace directories: `rm -rf ~/.local/share/hotnote/workspaces/`

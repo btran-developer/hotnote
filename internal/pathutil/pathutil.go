@@ -1,3 +1,4 @@
+// Package pathutil validates and resolves workspace-relative paths.
 package pathutil
 
 import (
@@ -7,17 +8,22 @@ import (
 )
 
 var (
-	ErrInvalidPath         = errors.New("invalid folder path: must be relative to workspace")
-	ErrPathOutsideWS       = errors.New("invalid folder path: must be inside workspace")
+	// ErrInvalidPath is returned when the path is absolute instead of relative.
+	ErrInvalidPath = errors.New("invalid folder path: must be relative to workspace")
+	// ErrPathOutsideWS is returned when the resolved path escapes the workspace.
+	ErrPathOutsideWS = errors.New("invalid folder path: must be inside workspace")
+	// ErrPathIsWorkspaceRoot is returned when the path is the workspace root itself.
 	ErrPathIsWorkspaceRoot = errors.New("cannot delete workspace root")
 )
 
+// ValidationResult holds the resolved paths after validation.
 type ValidationResult struct {
-	FolderPath    string
-	AbsWsPath     string
-	AbsFolderPath string
+	FolderPath    string // FolderPath is the resolved path relative to workspace.
+	AbsWsPath     string // AbsWsPath is the absolute workspace path.
+	AbsFolderPath string // AbsFolderPath is the absolute folder path.
 }
 
+// ValidateFolderPath validates that folder is a safe, workspace-relative path.
 func ValidateFolderPath(wsPath, folder string) (*ValidationResult, error) {
 	if filepath.IsAbs(folder) {
 		return nil, ErrInvalidPath

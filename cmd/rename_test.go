@@ -359,7 +359,6 @@ func TestRename_EmptySlug_ExitCode(t *testing.T) {
 	}
 }
 
-
 func TestRename_Alias_rn(t *testing.T) {
 	configDir := setupTestWorkspace(t)
 	t.Cleanup(func() { os.RemoveAll(configDir) })

@@ -1,9 +1,11 @@
+// Package slugify converts strings to URL-safe ASCII slugs.
 package slugify
 
 import (
 	"strings"
 )
 
+// Slugify converts s to a lowercase, hyphen-separated ASCII string.
 func Slugify(s string) string {
 	s = strings.ToLower(s)
 	s = strings.ReplaceAll(s, " ", "-")
@@ -21,6 +23,7 @@ func Slugify(s string) string {
 	return s
 }
 
+// SlugifyPath applies Slugify to each slash-separated segment of path.
 func SlugifyPath(path string) string {
 	if path == "" {
 		return ""
