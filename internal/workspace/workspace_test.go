@@ -490,3 +490,233 @@ func TestClearDefaultWorkspace_WithContents(t *testing.T) {
 	_, err = os.Stat(defaultPath)
 	assert.NoError(t, err)
 }
+
+func TestRename_Success(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	workPath := filepath.Join(configDir, "workspaces", "work")
+	err = os.MkdirAll(workPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": defaultPath,
+				"work":    workPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Rename("work", "personal")
+	require.NoError(t, err)
+
+	assert.Contains(t, m.config.Workspaces, "personal")
+	assert.NotContains(t, m.config.Workspaces, "work")
+	assert.Equal(t, workPath, m.config.Workspaces["personal"])
+}
+
+func TestRename_CurrentWorkspace(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-current-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	workPath := filepath.Join(configDir, "workspaces", "work")
+	err = os.MkdirAll(workPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "work",
+			Workspaces: map[string]string{
+				"default": defaultPath,
+				"work":    workPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Rename("work", "personal")
+	require.NoError(t, err)
+
+	assert.Equal(t, "personal", m.config.CurrentWorkspace)
+	assert.Contains(t, m.config.Workspaces, "personal")
+}
+
+func TestRename_DefaultWorkspace(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-default-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": defaultPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Rename("default", "newname")
+	assert.ErrorIs(t, err, ErrCannotRenameDefault)
+}
+
+func TestRename_NotFound(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-notfound-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": defaultPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Rename("nonexistent", "newname")
+	assert.ErrorIs(t, err, ErrWorkspaceDoesNotExist)
+}
+
+func TestRename_AlreadyExists(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-exists-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	workPath := filepath.Join(configDir, "workspaces", "work")
+	err = os.MkdirAll(workPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": defaultPath,
+				"work":    workPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Rename("default", "work")
+	assert.ErrorIs(t, err, ErrWorkspaceAlreadyExists)
+}
+
+func TestRename_PersistsConfig(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-persist-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	defaultPath := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(defaultPath, 0755)
+	require.NoError(t, err)
+
+	workPath := filepath.Join(configDir, "workspaces", "work")
+	err = os.MkdirAll(workPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			CurrentWorkspace: "default",
+			Workspaces: map[string]string{
+				"default": defaultPath,
+				"work":    workPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Rename("work", "personal")
+	require.NoError(t, err)
+
+	m2 := &Manager{
+		configPath: configPath,
+		config: &Config{
+			Workspaces: make(map[string]string),
+		},
+	}
+	m2.load()
+
+	assert.Contains(t, m2.config.Workspaces, "personal")
+	assert.NotContains(t, m2.config.Workspaces, "work")
+}
+
+func TestRename_EmptyOldName(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-empty-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			Workspaces: make(map[string]string),
+		},
+	}
+	m.save()
+
+	err = m.Rename("", "newname")
+	assert.ErrorIs(t, err, ErrEmptyWorkspaceName)
+}
+
+func TestRename_EmptyNewName(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-empty-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	workPath := filepath.Join(configDir, "workspaces", "work")
+	err = os.MkdirAll(workPath, 0755)
+	require.NoError(t, err)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	m := &Manager{
+		configPath: configPath,
+		config: &Config{
+			Workspaces: map[string]string{
+				"work": workPath,
+			},
+		},
+	}
+	m.save()
+
+	err = m.Rename("work", "")
+	assert.ErrorIs(t, err, ErrEmptyWorkspaceName)
+}

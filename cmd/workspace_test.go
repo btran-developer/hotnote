@@ -475,3 +475,158 @@ func TestWorkspaceCreate_Alias_new(t *testing.T) {
 	assert.Contains(t, response, "message")
 	assert.Contains(t, response["message"], "aliastest")
 }
+
+func TestWorkspaceRenameJSON_Success(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "work"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: default\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n  work: " + filepath.Join(workspaceDir, "work") + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "rename", "work", "personal", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Equal(t, "renamed", response["status"])
+	assert.Equal(t, "work", response["old"])
+	assert.Equal(t, "personal", response["new"])
+}
+
+func TestWorkspaceRenameJSON_CurrentWorkspace(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-current-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "work"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: work\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n  work: " + filepath.Join(workspaceDir, "work") + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "rename", "work", "personal", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Equal(t, "renamed", response["status"])
+
+	data, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	assert.Contains(t, string(data), "current_workspace: personal")
+}
+
+func TestWorkspaceRenameJSON_NotFound(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	out := runHotnote(t, "workspace", "rename", "nonexistent", "newname", "--json")
+
+	var response map[string]string
+	err := json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "error")
+	assert.Equal(t, "workspace not found", response["error"])
+}
+
+func TestWorkspaceRenameJSON_AlreadyExists(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-exists-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "work"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: default\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n  work: " + filepath.Join(workspaceDir, "work") + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "rename", "default", "work", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "error")
+	assert.Equal(t, "workspace already exists", response["error"])
+}
+
+func TestWorkspaceRenameJSON_DefaultProtected(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	out := runHotnote(t, "workspace", "rename", "default", "newname", "--json")
+
+	var response map[string]string
+	err := json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "error")
+	assert.Equal(t, "cannot rename default workspace", response["error"])
+}
+
+func TestWorkspaceRename_Alias_rn(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-rename-alias-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "work"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: default\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n  work: " + filepath.Join(workspaceDir, "work") + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "rn", "work", "personal", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Equal(t, "renamed", response["status"])
+}

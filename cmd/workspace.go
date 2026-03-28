@@ -351,6 +351,71 @@ Examples:
 	},
 }
 
+var workspaceRenameCmd = &cobra.Command{
+	Use:     "rename <old> <new>",
+	Short:   "Rename a workspace",
+	Aliases: []string{"rn"},
+	Args:    cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		oldName := args[0]
+		newName := args[1]
+
+		wm, err := workspace.NewManager()
+		if err != nil {
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+			} else {
+				fmt.Printf("create workspace manager: %v\n", err)
+			}
+			os.Exit(exitorrors.ExitGeneral)
+		}
+
+		if err := wm.Rename(oldName, newName); err != nil {
+			if errors.Is(err, workspace.ErrWorkspaceDoesNotExist) {
+				if jsonFlag {
+					outputJSONError("workspace not found")
+				} else {
+					fmt.Println("workspace not found")
+				}
+				os.Exit(exitorrors.ExitNotFound)
+			}
+			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
+				if jsonFlag {
+					outputJSONError("workspace already exists")
+				} else {
+					fmt.Println("workspace already exists")
+				}
+				os.Exit(exitorrors.ExitInvalidInput)
+			}
+			if errors.Is(err, workspace.ErrCannotRenameDefault) {
+				if jsonFlag {
+					outputJSONError("cannot rename default workspace")
+				} else {
+					fmt.Println("cannot rename default workspace")
+				}
+				os.Exit(exitorrors.ExitInvalidInput)
+			}
+			if jsonFlag {
+				outputJSONError(fmt.Sprintf("rename workspace: %v", err))
+			} else {
+				fmt.Printf("rename workspace: %v\n", err)
+			}
+			os.Exit(exitorrors.ExitGeneral)
+		}
+
+		if jsonFlag {
+			response := map[string]string{
+				"status": "renamed",
+				"old":    oldName,
+				"new":    newName,
+			}
+			outputJSON(response)
+		} else {
+			fmt.Printf("Renamed workspace: %s → %s\n", oldName, newName)
+		}
+	},
+}
+
 var workspaceDeleteForce bool
 var workspaceNewPath string
 
@@ -360,6 +425,7 @@ func init() {
 	workspaceCmd.AddCommand(workspaceUseCmd)
 	workspaceCmd.AddCommand(workspaceNewCmd)
 	workspaceCmd.AddCommand(workspaceDeleteCmd)
+	workspaceCmd.AddCommand(workspaceRenameCmd)
 	workspaceNewCmd.Flags().StringVar(&workspaceNewPath, "path", "", "Custom path for workspace")
 	workspaceDeleteCmd.Flags().BoolVar(&workspaceDeleteForce, "force", false, "Skip confirmation prompt")
 	RootCmd.AddCommand(workspaceCmd)

@@ -95,13 +95,13 @@
 - [x] JSON output support
 
 ### Issue M: workspace rename Command
-- [ ] Add `workspaceRenameCmd` to `cmd/workspace.go`
-- [ ] `hotnote workspace rename <old> <new>` renames workspace
-- [ ] Add `Rename(oldName, newName string) error` to `workspace.Manager`
-- [ ] Update config.workspaces map (move value, delete old key)
-- [ ] Update current_workspace if renaming current
-- [ ] Safety: reject if new-name already exists
-- [ ] JSON output support
+- [x] Add `workspaceRenameCmd` to `cmd/workspace.go`
+- [x] `hotnote workspace rename <old> <new>` renames workspace
+- [x] Add `Rename(oldName, newName string) error` to `workspace.Manager`
+- [x] Update config.workspaces map (move value, delete old key)
+- [x] Update current_workspace if renaming current
+- [x] Safety: reject if new-name already exists
+- [x] JSON output support
 
 ### Issue N: Add CrTime to NoteInfo
 - [ ] Add CrTime field to storage.NoteInfo struct

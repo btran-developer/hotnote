@@ -21,6 +21,10 @@ var (
 	ErrCannotDeleteCurrent = errors.New("cannot delete current workspace")
 	// ErrCannotDeleteDefaultStructure is returned when trying to delete the default workspace structure
 	ErrCannotDeleteDefaultStructure = errors.New("cannot delete default workspace structure")
+	// ErrCannotRenameDefault is returned when trying to rename the default workspace
+	ErrCannotRenameDefault = errors.New("cannot rename default workspace")
+	// ErrEmptyWorkspaceName is returned when a workspace name is empty
+	ErrEmptyWorkspaceName = errors.New("workspace name cannot be empty")
 )
 
 // Config represents the hotnote configuration
@@ -274,6 +278,43 @@ func (m *Manager) ClearDefaultWorkspace() error {
 		if err := os.RemoveAll(entryPath); err != nil {
 			return fmt.Errorf("workspace: delete %s: %w", entry.Name(), err)
 		}
+	}
+
+	return nil
+}
+
+// Rename renames a workspace
+func (m *Manager) Rename(oldName, newName string) error {
+	if oldName == "" || newName == "" {
+		return ErrEmptyWorkspaceName
+	}
+
+	if err := m.load(); err != nil {
+		return fmt.Errorf("workspace: load config: %w", err)
+	}
+
+	workspacePath, exists := m.config.Workspaces[oldName]
+	if !exists {
+		return ErrWorkspaceDoesNotExist
+	}
+
+	if _, exists := m.config.Workspaces[newName]; exists {
+		return ErrWorkspaceAlreadyExists
+	}
+
+	if oldName == "default" {
+		return ErrCannotRenameDefault
+	}
+
+	m.config.Workspaces[newName] = workspacePath
+	delete(m.config.Workspaces, oldName)
+
+	if m.config.CurrentWorkspace == oldName {
+		m.config.CurrentWorkspace = newName
+	}
+
+	if err := m.save(); err != nil {
+		return fmt.Errorf("workspace: save config: %w", err)
 	}
 
 	return nil

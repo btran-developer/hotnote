@@ -79,9 +79,13 @@ type Config struct {
 
 ```go
 var (
-    ErrWorkspaceNotInitialized = errors.New("workspace not initialized")
-    ErrWorkspaceAlreadyExists  = errors.New("workspace already exists")
-    ErrWorkspaceDoesNotExist   = errors.New("workspace does not exist")
+    ErrWorkspaceNotInitialized    = errors.New("workspace not initialized")
+    ErrWorkspaceAlreadyExists    = errors.New("workspace already exists")
+    ErrWorkspaceDoesNotExist     = errors.New("workspace does not exist")
+    ErrCannotDeleteCurrent       = errors.New("cannot delete current workspace")
+    ErrCannotDeleteDefaultStructure = errors.New("cannot delete default workspace structure")
+    ErrCannotRenameDefault       = errors.New("cannot rename default workspace")
+    ErrEmptyWorkspaceName        = errors.New("workspace name cannot be empty")
 )
 ```
 
@@ -161,6 +165,45 @@ func (m *Manager) New(name string, customPath string) error {
 }
 ```
 
+### Rename Workspace
+
+Renames a workspace by updating the config map. The directory path remains unchanged.
+
+```go
+func (m *Manager) Rename(oldName, newName string) error {
+    if oldName == "" || newName == "" {
+        return ErrEmptyWorkspaceName
+    }
+
+    workspacePath, exists := m.config.Workspaces[oldName]
+    if !exists {
+        return ErrWorkspaceDoesNotExist
+    }
+
+    if _, exists := m.config.Workspaces[newName]; exists {
+        return ErrWorkspaceAlreadyExists
+    }
+
+    if oldName == "default" {
+        return ErrCannotRenameDefault
+    }
+
+    m.config.Workspaces[newName] = workspacePath
+    delete(m.config.Workspaces, oldName)
+
+    if m.config.CurrentWorkspace == oldName {
+        m.config.CurrentWorkspace = newName
+    }
+
+    return m.save()
+}
+```
+
+**Safety rules:**
+- Cannot rename the `default` workspace
+- New name must not already exist
+- If renaming the current workspace, `current_workspace` is updated
+
 ## CLI Integration
 
 The `Store` type depends on `WorkspaceManager` interface:
@@ -187,6 +230,23 @@ This dependency injection pattern allows:
 - Easy testing (mock WorkspaceManager)
 - Flexibility in implementation
 - Decoupled components
+
+### Workspace Commands
+
+| Command | Alias | Description |
+|---------|-------|-------------|
+| `workspace init` | - | Initialize default workspace |
+| `workspace list` | `workspace ls` | List all workspaces |
+| `workspace use <name>` | - | Switch to workspace |
+| `workspace create <name>` | `workspace new` | Create workspace |
+| `workspace delete <name>` | `workspace del` | Delete workspace |
+| `workspace rename <old> <new>` | `workspace rn` | Rename workspace |
+
+**Rename command:**
+```
+hotnote workspace rename <old> <new>   # Rename workspace
+hotnote workspace rn work personal     # Using alias
+```
 
 ## Best Practices
 
