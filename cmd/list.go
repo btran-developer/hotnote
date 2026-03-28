@@ -12,8 +12,9 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all notes",
+	Use:     "list",
+	Short:   "List all notes",
+	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
 		wm, err := workspace.NewManager()
 		if err != nil {

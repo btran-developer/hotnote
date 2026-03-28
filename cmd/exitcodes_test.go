@@ -132,7 +132,7 @@ func TestExitCode_list_NoWorkspace(t *testing.T) {
 	}
 }
 
-func TestExitCode_new_MissingArg(t *testing.T) {
+func TestExitCode_create_MissingArg(t *testing.T) {
 	configDir, err := os.MkdirTemp("", "hotnote-test-exitcode-*")
 	if err != nil {
 		t.Fatal(err)

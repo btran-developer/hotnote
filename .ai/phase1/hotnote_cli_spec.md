@@ -23,10 +23,11 @@ Rules:
 
 ---
 
-## 2. hotnote new
+## 2. hotnote create
 
 Usage:
-hotnote new <title>
+hotnote create <title>
+hotnote new <title>         # alias
 
 Behavior:
 - Generate slug from title
@@ -174,10 +175,11 @@ workspace not found
 
 ---
 
-## workspace new
+## workspace create
 
 Usage:
-hotnote workspace new proj-a
+hotnote workspace create <name> [--path <path>]
+hotnote workspace new <name> [--path <path>]     # alias
 
 Output:
 Created workspace: proj-a
@@ -195,10 +197,12 @@ workspace already exists
 
 ---
 
-## 8. hotnote mkdir
+## 8. hotnote folder create
 
 Usage:
-hotnote mkdir <folder>
+hotnote folder create <folder>
+hotnote folder new <folder>      # alias
+hotnote folder cr <folder>       # alias
 
 Behavior:
 - Create folder in current workspace
@@ -225,10 +229,11 @@ Errors:
 
 ---
 
-## 9. hotnote rmdir
+## 9. hotnote folder delete
 
 Usage:
-hotnote rmdir <folder>
+hotnote folder delete <folder>
+hotnote folder del <folder>       # alias
 
 Behavior:
 - Delete folder from current workspace
@@ -253,6 +258,42 @@ JSON:
 Errors:
 - folder not found
 - cannot delete workspace root
+
+---
+
+## 9a. hotnote folder list
+
+Usage:
+hotnote folder list [path]
+hotnote folder ls [path]     # alias
+
+Behavior:
+- List files and folders in specified path
+- Defaults to workspace root if no path given
+- Folders listed first, then files
+- Alphabetically sorted
+
+Flags:
+--json
+--pretty
+
+Output:
+folder1/
+folder2/
+note1.md
+note2.md
+
+JSON:
+[
+  {"name": "folder1", "path": "folder1", "type": "folder"},
+  {"name": "folder2", "path": "folder2", "type": "folder"},
+  {"name": "note1.md", "path": "note1.md", "type": "file"},
+  {"name": "note2.md", "path": "note2.md", "type": "file"}
+]
+
+Errors:
+- path not found
+- invalid folder path
 
 ---
 

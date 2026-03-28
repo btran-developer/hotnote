@@ -27,9 +27,10 @@ var md = goldmark.New(
 )
 
 var renderCmd = &cobra.Command{
-	Use:   "render [title]",
-	Short: "Render markdown to HTML",
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "render [title]",
+	Short:   "Render markdown to HTML",
+	Aliases: []string{"rdr"},
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
 		wm, err := workspace.NewManager()

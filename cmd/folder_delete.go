@@ -13,12 +13,13 @@ import (
 	"hotnotego/internal/workspace"
 )
 
-var rmdirForce bool
+var folderDeleteForce bool
 
-var rmdirCmd = &cobra.Command{
-	Use:   "rmdir <folder>",
-	Short: "Delete a folder from the current workspace",
-	Args:  cobra.MinimumNArgs(1),
+var folderDeleteCmd = &cobra.Command{
+	Use:     "delete <folder>",
+	Short:   "Delete a folder from the current workspace",
+	Aliases: []string{"del"},
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		folder := args[0]
 
@@ -92,12 +93,12 @@ var rmdirCmd = &cobra.Command{
 
 		hasContents := len(entries) > 0
 
-		if hasContents && !rmdirForce && jsonFlag {
+		if hasContents && !folderDeleteForce && jsonFlag {
 			outputJSONError("folder not empty: use --force to delete")
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
-		if hasContents && !rmdirForce {
+		if hasContents && !folderDeleteForce {
 			fmt.Printf("Delete folder '%s' and all contents? [y/N]: ", folder)
 			reader := bufio.NewReader(os.Stdin)
 			input, err := reader.ReadString('\n')
@@ -132,6 +133,6 @@ var rmdirCmd = &cobra.Command{
 }
 
 func init() {
-	rmdirCmd.Flags().BoolVar(&rmdirForce, "force", false, "Skip confirmation prompt")
-	RootCmd.AddCommand(rmdirCmd)
+	folderDeleteCmd.Flags().BoolVar(&folderDeleteForce, "force", false, "Skip confirmation prompt")
+	folderCmd.AddCommand(folderDeleteCmd)
 }

@@ -16,9 +16,10 @@ import (
 var deleteForce bool
 
 var deleteCmd = &cobra.Command{
-	Use:   "delete <slug>",
-	Short: "Delete a note from the current workspace",
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "delete <slug>",
+	Short:   "Delete a note from the current workspace",
+	Aliases: []string{"del"},
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		slug := args[0]
 

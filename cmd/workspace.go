@@ -58,8 +58,9 @@ var workspaceInitCmd = &cobra.Command{
 }
 
 var workspaceListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all workspaces",
+	Use:     "list",
+	Short:   "List all workspaces",
+	Aliases: []string{"ls"},
 	Run: func(cmd *cobra.Command, args []string) {
 		wm, err := workspace.NewManager()
 		if err != nil {
@@ -161,8 +162,9 @@ var workspaceUseCmd = &cobra.Command{
 }
 
 var workspaceNewCmd = &cobra.Command{
-	Use:   "new <name> [--path <path>]",
-	Short: "Create a new workspace",
+	Use:     "create <name> [--path <path>]",
+	Short:   "Create a new workspace",
+	Aliases: []string{"new"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) < 1 {
 			if jsonFlag {
@@ -174,11 +176,6 @@ var workspaceNewCmd = &cobra.Command{
 		}
 		name := args[0]
 
-		path := ""
-		if len(args) > 1 {
-			path = args[1]
-		}
-
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
@@ -188,7 +185,7 @@ var workspaceNewCmd = &cobra.Command{
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
-		if err := wm.New(name, path); err != nil {
+		if err := wm.New(name, workspaceNewPath); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
 				if jsonFlag {
 					outputJSONError("workspace already exists")
@@ -232,7 +229,8 @@ Examples:
   hotnote workspace delete work              # Delete 'work' workspace
   hotnote workspace delete default           # Clear all contents in default
   hotnote workspace delete work --force      # Skip confirmation prompt`,
-	Args: cobra.MinimumNArgs(1),
+	Aliases: []string{"del"},
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 
@@ -354,6 +352,7 @@ Examples:
 }
 
 var workspaceDeleteForce bool
+var workspaceNewPath string
 
 func init() {
 	workspaceCmd.AddCommand(workspaceInitCmd)
@@ -361,6 +360,7 @@ func init() {
 	workspaceCmd.AddCommand(workspaceUseCmd)
 	workspaceCmd.AddCommand(workspaceNewCmd)
 	workspaceCmd.AddCommand(workspaceDeleteCmd)
+	workspaceNewCmd.Flags().StringVar(&workspaceNewPath, "path", "", "Custom path for workspace")
 	workspaceDeleteCmd.Flags().BoolVar(&workspaceDeleteForce, "force", false, "Skip confirmation prompt")
 	RootCmd.AddCommand(workspaceCmd)
 }

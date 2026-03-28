@@ -18,9 +18,10 @@ var folderCmd = &cobra.Command{
 }
 
 var folderRenameCmd = &cobra.Command{
-	Use:   "rename <old> <new>",
-	Short: "Rename a folder in the current workspace",
-	Args:  cobra.ExactArgs(2),
+	Use:     "rename <old> <new>",
+	Short:   "Rename a folder in the current workspace",
+	Aliases: []string{"rn"},
+	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		oldFolder := args[0]
 		newFolder := args[1]

@@ -397,3 +397,81 @@ func TestWorkspaceDeleteDefaultJSON_WithForce(t *testing.T) {
 	assert.Equal(t, "cleared", response["status"])
 	assert.Equal(t, "default", response["workspace"])
 }
+
+func TestWorkspaceList_Alias_ls(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	out := runHotnote(t, "workspace", "ls", "--json")
+
+	var response []map[string]interface{}
+	err := json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Len(t, response, 1)
+	assert.Equal(t, "default", response[0]["name"])
+}
+
+func TestWorkspaceDelete_Alias_del(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-del-alias-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+	err = os.MkdirAll(filepath.Join(workspaceDir, "work"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	wsPath := filepath.Join(workspaceDir, "work")
+	err = os.WriteFile(filepath.Join(wsPath, "note.md"), []byte("# Note"), 0644)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: default\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n  work: " + wsPath + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "del", "work", "--force", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Equal(t, "deleted", response["status"])
+	assert.Equal(t, "work", response["workspace"])
+}
+
+func TestWorkspaceCreate_Alias_new(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-new-alias-*")
+	require.NoError(t, err)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	workspaceDir := filepath.Join(configDir, "workspaces")
+	err = os.MkdirAll(filepath.Join(workspaceDir, "default"), 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	configContent := "current_workspace: default\nworkspaces:\n  default: " + filepath.Join(workspaceDir, "default") + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "new", "aliastest", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Contains(t, response, "message")
+	assert.Contains(t, response["message"], "aliastest")
+}

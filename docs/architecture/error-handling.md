@@ -134,7 +134,7 @@ var (
 )
 ```
 
-These errors are used by `mkdir` and `rmdir` commands to validate that folder paths stay within the workspace boundaries.
+These errors are used by `folder create` and `folder delete` commands to validate that folder paths stay within the workspace boundaries.
 
 ## JSON Error Responses
 

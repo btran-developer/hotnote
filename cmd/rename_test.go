@@ -358,3 +358,25 @@ func TestRename_EmptySlug_ExitCode(t *testing.T) {
 		t.Errorf("expected exit code 3, got %d", code)
 	}
 }
+
+
+func TestRename_Alias_rn(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	_, wsPath, err := findWorkspacePath(configDir)
+	require.NoError(t, err)
+	notePath := filepath.Join(wsPath, "oldname.md")
+	err = os.WriteFile(notePath, []byte("# Old Name"), 0644)
+	require.NoError(t, err)
+
+	out := runHotnote(t, "rn", "oldname", "New Name", "--force", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Equal(t, "renamed", response["status"])
+	assert.Equal(t, "oldname", response["old_slug"])
+	assert.Equal(t, "new-name", response["new_slug"])
+}

@@ -132,3 +132,23 @@ func TestOpen_ExitCode_MultipleMatches(t *testing.T) {
 		t.Errorf("expected exit code 3, got %d", code)
 	}
 }
+
+func TestOpen_Alias_op(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	_, wsPath, err := findWorkspacePath(configDir)
+	require.NoError(t, err)
+	notePath := filepath.Join(wsPath, "testnote.md")
+	err = os.WriteFile(notePath, []byte("# Test Note"), 0644)
+	require.NoError(t, err)
+
+	out := runHotnote(t, "op", "testnote", "--json")
+
+	var response map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Equal(t, "opened", response["status"])
+	assert.Contains(t, response["path"], "testnote.md")
+}

@@ -15,12 +15,13 @@ import (
 	"hotnotego/internal/workspace"
 )
 
-var newPath string
+var createPath string
 
-var newCmd = &cobra.Command{
-	Use:   "new [title]",
-	Short: "Create a new note",
-	Args:  cobra.MinimumNArgs(1),
+var createCmd = &cobra.Command{
+	Use:     "create [title]",
+	Short:   "Create a new note",
+	Aliases: []string{"new"},
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
 		wm, err := workspace.NewManager()
@@ -45,8 +46,8 @@ var newCmd = &cobra.Command{
 		}
 
 		var fullSlug string
-		if newPath != "" {
-			fullSlug = filepath.Join(newPath, baseSlug)
+		if createPath != "" {
+			fullSlug = filepath.Join(createPath, baseSlug)
 		} else {
 			fullSlug = baseSlug
 		}
@@ -92,6 +93,6 @@ var newCmd = &cobra.Command{
 }
 
 func init() {
-	newCmd.Flags().StringVar(&newPath, "path", "", "Subfolder path for the new note (e.g., projects/todo)")
-	RootCmd.AddCommand(newCmd)
+	createCmd.Flags().StringVar(&createPath, "path", "", "Subfolder path for the new note (e.g., projects/todo)")
+	RootCmd.AddCommand(createCmd)
 }

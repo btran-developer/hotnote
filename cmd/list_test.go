@@ -118,3 +118,23 @@ func TestList_NoWorkspace(t *testing.T) {
 
 	assert.Contains(t, out, "create workspace manager")
 }
+
+func TestList_Alias_ls(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	_, wsPath, err := findWorkspacePath(configDir)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(wsPath, "test.md"), []byte("# Test"), 0644)
+	require.NoError(t, err)
+
+	out := runHotnote(t, "ls", "--json")
+
+	var response []map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	assert.Len(t, response, 1)
+	assert.Equal(t, "test", response[0]["slug"])
+}

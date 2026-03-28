@@ -13,9 +13,10 @@ import (
 )
 
 var openCmd = &cobra.Command{
-	Use:   "open [title]",
-	Short: "Open a note for editing",
-	Args:  cobra.MinimumNArgs(1),
+	Use:     "open [title]",
+	Short:   "Open a note for editing",
+	Aliases: []string{"op"},
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		title := args[0]
 		wm, err := workspace.NewManager()

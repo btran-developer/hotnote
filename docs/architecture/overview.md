@@ -88,14 +88,20 @@ Uses [Cobra](https://github.com/spf13/cobra) for command-line parsing. Each comm
 
 | Command | File | Purpose |
 |---------|------|---------|
-| `hotnote new` | `new.go` | Create a new note |
+| `hotnote create` | `create.go` | Create a new note (alias: `new`) |
 | `hotnote list` | `list.go` | List all notes (alias: `ls`) |
-| `hotnote open` | `open.go` | Open note in `$EDITOR` (alias: `opn`) |
+| `hotnote open` | `open.go` | Open note in `$EDITOR` (alias: `op`) |
 | `hotnote render` | `render.go` | Render markdown to HTML (alias: `rdr`) |
-| `hotnote folder` | `folder.go` | Folder management (make, remove, list, rename) |
 | `hotnote delete` | `delete.go` | Delete a note (alias: `del`) |
 | `hotnote rename` | `rename.go` | Rename a note (alias: `rn`) |
+| `hotnote folder` | `folder.go` | Folder management |
+| `hotnote folder create` | `folder_create.go` | Create folder (aliases: `new`, `cr`) |
+| `hotnote folder delete` | `folder_delete.go` | Delete folder (alias: `del`) |
+| `hotnote folder list` | `folder_list.go` | List folder contents (alias: `ls`) |
+| `hotnote folder rename` | `folder.go` | Rename folder (alias: `rn`) |
 | `hotnote workspace` | `workspace.go` | Manage workspaces |
+| `hotnote workspace create` | `workspace.go` | Create workspace (alias: `new`) |
+| `hotnote tui` | `tui.go` | Launch TUI |
 | `hotnote ai` | `ai.go` | AI operations (stub) |
 
 ### Internal Layer (`internal/`)

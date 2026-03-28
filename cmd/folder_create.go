@@ -11,10 +11,11 @@ import (
 	"hotnotego/internal/workspace"
 )
 
-var mkdirCmd = &cobra.Command{
-	Use:   "mkdir <folder>",
-	Short: "Create a folder in the current workspace",
-	Args:  cobra.MinimumNArgs(1),
+var folderCreateCmd = &cobra.Command{
+	Use:     "create <folder>",
+	Short:   "Create a folder in the current workspace",
+	Aliases: []string{"new", "cr"},
+	Args:    cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		folder := args[0]
 
@@ -97,5 +98,5 @@ var mkdirCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(mkdirCmd)
+	folderCmd.AddCommand(folderCreateCmd)
 }

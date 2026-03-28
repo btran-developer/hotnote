@@ -13,8 +13,8 @@ This is a breaking change since the app is still in early development (Phase 1).
 
 | Old Command | New Command | Alias |
 |--------------|-------------|-------|
-| `hotnote mkdir <path>` | `hotnote folder make <path>` | `hotnote folder mk <path>` |
-| `hotnote rmdir <path>` | `hotnote folder remove <path>` | `hotnote folder rmv <path>` |
+| `hotnote mkdir <path>` | `hotnote folder create <path>` | `hotnote folder new <path>`, `hotnote folder cr <path>` |
+| `hotnote rmdir <path>` | `hotnote folder delete <path>` | `hotnote folder del <path>` |
 
 ## New Features
 

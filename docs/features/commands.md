@@ -15,6 +15,44 @@ These flags work with all commands:
 
 > **Note:** The `--data-dir` flag is deprecated and non-functional. Use workspace-based organization instead.
 
+## Command Aliases
+
+All commands have consistent aliases for faster typing:
+
+| Operation | Root Command | Folder Command | Workspace Command |
+|-----------|--------------|----------------|-------------------|
+| **Create** | `create` / `new` | `folder create` / `folder new` / `folder cr` | `workspace create` / `workspace new` |
+| **List** | `list` / `ls` | `folder list` / `folder ls` | `workspace list` / `workspace ls` |
+| **Delete** | `delete` / `del` | `folder delete` / `folder del` | `workspace delete` / `workspace del` |
+| **Rename** | `rename` / `rn` | `folder rename` / `folder rn` | (future) |
+| **Open** | `open` / `op` | - | - |
+| **Render** | `render` / `rdr` | - | - |
+
+### Examples Using Aliases
+
+```bash
+# All these create a note:
+hotnote create "My Note"
+hotnote new "My Note"
+
+# All these list notes:
+hotnote list
+hotnote ls
+
+# All these delete a note:
+hotnote delete my-note
+hotnote del my-note
+
+# All these create a folder:
+hotnote folder create projects
+hotnote folder new projects
+hotnote folder cr projects
+
+# All these list workspaces:
+hotnote workspace list
+hotnote workspace ls
+```
+
 ## Exit Codes
 
 Hotnote returns the following exit codes:
@@ -27,14 +65,15 @@ Hotnote returns the following exit codes:
 | 3 | Invalid input | Missing required arguments |
 | 4 | Config error | Workspace not initialized |
 
-## hotnote new
+## hotnote create
 
 Create a new note with YAML frontmatter.
 
 ### Usage
 
 ```bash
-hotnote new [title] [flags]
+hotnote create [title] [flags]
+hotnote new [title] [flags]  # alias
 ```
 
 ### Arguments
@@ -55,16 +94,17 @@ hotnote new [title] [flags]
 
 ```bash
 # Create a note titled "My Research"
-hotnote new "My Research"
+hotnote create "My Research"
+hotnote new "My Research"          # alias
 
 # Create a note with special characters
-hotnote new "Q3 2024 Goals!"
+hotnote create "Q3 2024 Goals!"
 
 # Create note in subfolder
-hotnote new "My Research" --path projects
+hotnote create "My Research" --path projects
 
 # Create note with explicit slug
-hotnote new "My Research" --slug my-research
+hotnote create "My Research" --slug my-research
 ```
 
 ### Output Formats
@@ -117,6 +157,7 @@ List all notes in the current workspace, including notes in subfolders.
 
 ```bash
 hotnote list [flags]
+hotnote ls [flags]    # alias
 ```
 
 ### Flags
@@ -178,6 +219,7 @@ Open a note in the default editor.
 
 ```bash
 hotnote open [title] [flags]
+hotnote op [title] [flags]    # alias
 ```
 
 ### Arguments
@@ -233,6 +275,7 @@ Render a note as HTML.
 
 ```bash
 hotnote render [title] [flags]
+hotnote rdr [title] [flags]    # alias
 ```
 
 ### Arguments
@@ -374,12 +417,13 @@ work	/Users/user/.local/share/hotnote/workspaces/work
 
 Current workspace marked with `*`.
 
-#### new
+#### create
 
 Create a new workspace.
 
 ```bash
-hotnote workspace new <name> [flags]
+hotnote workspace create <name> [flags]
+hotnote workspace new <name> [flags]  # alias
 ```
 
 | Flag | Description |
@@ -388,10 +432,11 @@ hotnote workspace new <name> [flags]
 
 ```bash
 # Create workspace in default location
-hotnote workspace new work
+hotnote workspace create work
+hotnote workspace new work          # using alias
 
 # Create workspace in custom location
-hotnote workspace new archive --path /mnt/notes/archive
+hotnote workspace create archive --path /mnt/notes/archive
 ```
 
 **JSON output (`--json`):**
@@ -456,14 +501,16 @@ Deleted workspace: work
 
 ---
 
-## hotnote mkdir
+## hotnote folder create
 
 Create a folder in the current workspace.
 
 ### Usage
 
 ```bash
-hotnote mkdir <folder>
+hotnote folder create <folder>
+hotnote folder new <folder>     # alias
+hotnote folder cr <folder>      # alias
 ```
 
 ### Arguments
@@ -476,10 +523,11 @@ hotnote mkdir <folder>
 
 ```bash
 # Create a folder
-hotnote mkdir projects
+hotnote folder create projects
+hotnote folder new projects     # using alias
 
 # Create nested folder
-hotnote mkdir projects/2024
+hotnote folder create projects/2024
 ```
 
 **Output:**
@@ -503,14 +551,15 @@ Created folder: projects
 
 ---
 
-## hotnote rmdir
+## hotnote folder delete
 
 Delete a folder from the current workspace.
 
 ### Usage
 
 ```bash
-hotnote rmdir <folder> [flags]
+hotnote folder delete <folder> [flags]
+hotnote folder del <folder> [flags]   # alias
 ```
 
 ### Arguments
@@ -529,10 +578,11 @@ hotnote rmdir <folder> [flags]
 
 ```bash
 # Delete folder (prompts if not empty)
-hotnote rmdir projects
+hotnote folder delete projects
+hotnote folder del projects      # using alias
 
 # Force delete without confirmation
-hotnote rmdir projects --force
+hotnote folder delete projects --force
 ```
 
 **Output:**
@@ -558,6 +608,63 @@ Deleted folder: projects
 
 ---
 
+## hotnote folder list
+
+List files and folders in a directory.
+
+### Usage
+
+```bash
+hotnote folder list [path]
+hotnote folder ls [path]    # alias
+```
+
+### Arguments
+
+| Argument | Description |
+|----------|-------------|
+| `path` | Path to list (defaults to workspace root) |
+
+### Examples
+
+```bash
+# List all files and folders in workspace root
+hotnote folder list
+
+# List contents of a subfolder
+hotnote folder list projects
+
+# Using alias
+hotnote folder ls
+```
+
+**Output:**
+```
+folder1/
+folder2/
+note1.md
+note2.md
+```
+
+**JSON output (`--json`):**
+```json
+[
+  {"name": "folder1", "path": "folder1", "type": "folder"},
+  {"name": "folder2", "path": "folder2", "type": "folder"},
+  {"name": "note1.md", "path": "note1.md", "type": "file"},
+  {"name": "note2.md", "path": "note2.md", "type": "file"}
+]
+```
+
+**Errors:**
+
+| Error | Exit Code | Description |
+|-------|-----------|-------------|
+| `path not found: <path>` | 2 | Path does not exist |
+| `invalid folder path: must be inside workspace` | 3 | Path escapes workspace |
+
+---
+
 ## hotnote delete
 
 Delete a note from the current workspace.
@@ -566,6 +673,7 @@ Delete a note from the current workspace.
 
 ```bash
 hotnote delete <slug> [flags]
+hotnote del <slug> [flags]    # alias
 ```
 
 ### Arguments
@@ -624,6 +732,7 @@ Rename a note in the current workspace.
 
 ```bash
 hotnote rename <old> <new> [flags]
+hotnote rn <old> <new> [flags]    # alias
 ```
 
 ### Arguments

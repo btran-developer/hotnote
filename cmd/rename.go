@@ -17,9 +17,10 @@ import (
 var renameForce bool
 
 var renameCmd = &cobra.Command{
-	Use:   "rename <old> <new>",
-	Short: "Rename a note in the current workspace",
-	Args:  cobra.ExactArgs(2),
+	Use:     "rename <old> <new>",
+	Short:   "Rename a note in the current workspace",
+	Aliases: []string{"rn"},
+	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		oldSlug := args[0]
 		newTitle := args[1]

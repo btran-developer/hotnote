@@ -54,16 +54,19 @@ Render note:
     hotnote render projects/my-idea          # Direct path
 
 Create folder:
-    hotnote mkdir projects
-    hotnote mkdir projects/2024
+    hotnote folder create projects
+    hotnote folder create projects/2024
+    hotnote folder cr projects                    # alias
 
 Delete note:
     hotnote delete my-idea
     hotnote delete my-idea --force
+    hotnote del my-idea --force                  # alias
 
 Delete folder:
-    hotnote rmdir projects
-    hotnote rmdir projects --force
+    hotnote folder delete projects
+    hotnote folder delete projects --force
+    hotnote folder del projects --force            # alias
 
 Workspace management:
     hotnote workspace init

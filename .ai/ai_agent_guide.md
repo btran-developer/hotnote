@@ -210,17 +210,18 @@ hotnote workspace new my-workspace --json
 
 | Command | JSON Support | --force Support | Notes |
 |---------|--------------|-----------------|-------|
-| new | ✓ | N/A | Creates note |
+| create | ✓ | N/A | Creates note |
 | list | ✓ | N/A | Lists all notes |
 | open | ✓ | N/A | Opens in $EDITOR |
 | render | ✓ | N/A | Renders to HTML |
-| mkdir | ✓ | N/A | Creates folder |
-| rmdir | ✓ | ✓ | Deletes folder |
 | delete | ✓ | ✓ | Deletes note |
+| folder create | ✓ | N/A | Creates folder |
+| folder delete | ✓ | ✓ | Deletes folder |
+| folder list | ✓ | N/A | Lists folder contents |
 | workspace init | ✓ | N/A | Initializes workspace |
+| workspace create | ✓ | N/A | Creates workspace |
 | workspace list | ✓ | N/A | Lists workspaces |
 | workspace use | ✓ | N/A | Switches workspace |
-| workspace new | ✓ | N/A | Creates workspace |
 | workspace delete | ✓ | ✓ | Deletes workspace |
 
 ---

@@ -31,15 +31,15 @@
 - [ ] Remove `$DEBUG` documentation if not implemented
 
 ### Issue E: mkdir Command
-- [x] Create `cmd/mkdir.go`
-- [x] `hotnote mkdir <folder>` creates folder
+- [x] Create `cmd/mkdir.go` (now `cmd/folder_create.go`)
+- [x] `hotnote mkdir <folder>` creates folder (now `hotnote folder create`)
 - [x] Support nested folder creation
 - [x] JSON output support
 - [x] Error handling
 
 ### Issue F: rmdir Command
-- [x] Create `cmd/rmdir.go`
-- [x] `hotnote rmdir <folder>` deletes folder
+- [x] Create `cmd/rmdir.go` (now `cmd/folder_delete.go`)
+- [x] `hotnote rmdir <folder>` deletes folder (now `hotnote folder delete`)
 - [x] Confirmation prompt if folder not empty
 - [x] `--force` flag to skip prompt
 - [x] JSON output support
@@ -111,50 +111,50 @@
 - [ ] Document behavior in commands.md
 
 ### Issue O: CLI Command Restructure - Breaking Changes
-- [ ] Refactor `mkdir` → `folder make` with `mk` alias
-- [ ] Refactor `rmdir` → `folder remove` with `rmv` alias
-- [ ] Add aliases to existing commands:
-  - [ ] `list` → `ls`
-  - [ ] `delete` → `del`
-  - [ ] `open` → `opn`
-  - [ ] `render` → `rdr`
-  - [ ] `rename` → `rn`
-  - [ ] `folder rename` → `rn`
-  - [ ] `workspace list` → `workspace ls`
-  - [ ] `workspace delete` → `workspace del`
-- [ ] Delete old `cmd/mkdir.go` and `cmd/rmdir.go` files
-- [ ] Update all test files to use new command names
-- [ ] Add tests for alias functionality
-- [ ] Update `docs/features/commands.md`:
-  - [ ] Document new `folder` subcommand structure
-  - [ ] Add alias information to all commands
-  - [ ] Update examples with new syntax
-- [ ] Update `docs/architecture/overview.md` command table
-- [ ] Update `docs/index.md` quick reference
-- [ ] Update `.ai/phase1/hotnote_cli_spec.md` with new command structure
+- [x] Refactor `mkdir` → `folder create` with `new`, `cr` aliases
+- [x] Refactor `rmdir` → `folder delete` with `del` alias
+- [x] Add aliases to existing commands:
+  - [x] `list` → `ls`
+  - [x] `delete` → `del`
+  - [x] `open` → `op`
+  - [x] `render` → `rdr`
+  - [x] `rename` → `rn`
+  - [x] `folder rename` → `rn`
+  - [x] `workspace list` → `ls`
+  - [x] `workspace delete` → `del`
+  - [x] `workspace new` → `create` with `new` alias
+- [x] Delete old `cmd/mkdir.go` and `cmd/rmdir.go` files
+- [x] Update all test files to use new command names
+- [x] Add tests for alias functionality
+- [x] Update `docs/features/commands.md`:
+  - [x] Document new `folder` subcommand structure
+  - [x] Add alias information to all commands
+  - [x] Update examples with new syntax
+- [x] Update `docs/architecture/overview.md` command table
+- [x] Update `.ai/phase1/hotnote_cli_spec.md` with new command structure
 
 ### Issue P: Add folder list Command
-- [ ] Create `cmd/folder_list.go` with `folder list [path]` command
-- [ ] Support optional path argument (defaults to current directory)
-- [ ] List all files and folders in specified path
-- [ ] JSON output: array of objects with `name`, `path`, `type` fields
-- [ ] Human output: tree-like format showing files and folders
-- [ ] Add `ls` alias for `folder list`
-- [ ] Handle errors: invalid path, path outside workspace, workspace not initialized
-- [ ] Unit tests for folder list command
-- [ ] Integration tests with JSON and human output
-- [ ] Update documentation in `docs/features/commands.md`
-- [ ] Update AI agent spec if needed
+- [x] Create `cmd/folder_list.go` with `folder list [path]` command
+- [x] Support optional path argument (defaults to current directory)
+- [x] List all files and folders in specified path
+- [x] JSON output: array of objects with `name`, `path`, `type` fields
+- [x] Human output: tree-like format showing files and folders
+- [x] Add `ls` alias for `folder list`
+- [x] Handle errors: invalid path, path outside workspace, workspace not initialized
+- [x] Unit tests for folder list command
+- [x] Integration tests with JSON and human output
+- [x] Update documentation in `docs/features/commands.md`
+- [x] Update `.ai/phase1/hotnote_cli_spec.md`
 
 ---
 
 ### Legacy: CLI (Phase 1) - Original
 
 #### Core Commands
-- [x] new command
-- [x] list command
-- [x] open command
-- [x] render command
+- [x] create command (alias: new)
+- [x] list command (alias: ls)
+- [x] open command (alias: op)
+- [x] render command (alias: rdr)
 
 #### Workspace Management
 - [x] workspace init
