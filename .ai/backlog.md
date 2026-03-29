@@ -109,11 +109,11 @@
 - [x] JSON output support
 
 ### Issue N: Add CrTime to NoteInfo
-- [ ] Add CrTime field to storage.NoteInfo struct
-- [ ] Populate from frontmatter created_at when available
-- [ ] Fall back to filesystem birth time or ModTime
-- [ ] Display creation time in list output
-- [ ] Document behavior in commands.md
+- [x] Add CrTime field to storage.NoteInfo struct
+- [x] Populate from frontmatter created_at when available
+- [x] Fall back to ModTime
+- [x] Display creation time in list output
+- [x] Document behavior in commands.md
 
 ### Issue O: CLI Command Restructure - Breaking Changes
 - [x] Refactor `mkdir` → `folder create` with `new`, `cr` aliases
