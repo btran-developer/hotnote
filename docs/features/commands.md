@@ -184,14 +184,16 @@ hotnote list --json --pretty
 
 **Plain text:**
 ```
-test-note	2026-01-15 10:30
-my-research	2026-01-14 09:00
-project-ideas	2026-01-13 15:45
+test-note	2025-06-15 10:30	2026-01-15 10:30
+my-research	2025-06-10 09:00	2026-01-14 09:00
+project-ideas	2025-06-05 15:45	2026-01-13 15:45
 ```
+
+Columns: `slug`, `created`, `updated` (tab-separated).
 
 **JSON (`--json`):**
 ```json
-[{"slug":"test-note","path":"/Users/user/.local/share/hotnote/workspaces/default/test-note.md","updated_at":"2026-01-15T10:30:00Z"}]
+[{"slug":"test-note","path":"test-note.md","created_at":"2025-06-15T10:30:00Z","updated_at":"2026-01-15T10:30:00Z"}]
 ```
 
 **Pretty-printed JSON (`--json --pretty`):**
@@ -199,17 +201,16 @@ project-ideas	2026-01-13 15:45
 [
   {
     "slug": "test-note",
-    "path": "/Users/user/.local/share/hotnote/workspaces/default/test-note.md",
+    "path": "test-note.md",
+    "created_at": "2025-06-15T10:30:00Z",
     "updated_at": "2026-01-15T10:30:00Z"
   }
 ]
 ```
 
-### Notes
+### Creation Time
 
-- Only `.md` files are listed
-- Files are read from the current workspace directory
-- Does not show content, only filenames
+The `created_at` value is derived from the YAML frontmatter `created_at` field. If the note has no frontmatter or no `created_at` field, it falls back to the filesystem modification time.
 
 ## hotnote open
 

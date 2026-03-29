@@ -138,3 +138,62 @@ func TestList_Alias_ls(t *testing.T) {
 	assert.Len(t, response, 1)
 	assert.Equal(t, "test", response[0]["slug"])
 }
+
+func TestList_JSON_CreatedAt(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	_, wsPath, err := findWorkspacePath(configDir)
+	require.NoError(t, err)
+
+	frontmatter := "---\nid: abc-123\ntitle: Test\ncreated_at: 2025-06-15T10:30:00Z\nupdated_at: 2025-06-15T10:30:00Z\ntags: []\n---\n\n# Test\n"
+	err = os.WriteFile(filepath.Join(wsPath, "test.md"), []byte(frontmatter), 0644)
+	require.NoError(t, err)
+
+	out := runHotnote(t, "list", "--json")
+
+	var response []map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	require.Len(t, response, 1)
+	assert.Equal(t, "2025-06-15T10:30:00Z", response[0]["created_at"])
+	assert.Equal(t, "test", response[0]["slug"])
+}
+
+func TestList_Human_CreatedAt(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	_, wsPath, err := findWorkspacePath(configDir)
+	require.NoError(t, err)
+
+	frontmatter := "---\nid: abc-123\ntitle: Test\ncreated_at: 2025-06-15T10:30:00Z\nupdated_at: 2025-06-15T10:30:00Z\ntags: []\n---\n\n# Test\n"
+	err = os.WriteFile(filepath.Join(wsPath, "test.md"), []byte(frontmatter), 0644)
+	require.NoError(t, err)
+
+	out := runHotnote(t, "list")
+
+	assert.Contains(t, out, "test")
+	assert.Contains(t, out, "2025-06-15 10:30")
+}
+
+func TestList_JSON_CreatedAt_Fallback(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	_, wsPath, err := findWorkspacePath(configDir)
+	require.NoError(t, err)
+
+	err = os.WriteFile(filepath.Join(wsPath, "plain.md"), []byte("# Plain"), 0644)
+	require.NoError(t, err)
+
+	out := runHotnote(t, "list", "--json")
+
+	var response []map[string]string
+	err = json.Unmarshal([]byte(out), &response)
+	require.NoError(t, err)
+
+	require.Len(t, response, 1)
+	assert.Equal(t, response[0]["created_at"], response[0]["updated_at"])
+}

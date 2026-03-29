@@ -44,6 +44,7 @@ var listCmd = &cobra.Command{
 				jsonNotes = append(jsonNotes, map[string]string{
 					"slug":       note.Slug,
 					"path":       note.RelPath,
+					"created_at": note.CrTime.UTC().Format(time.RFC3339),
 					"updated_at": note.ModTime.UTC().Format(time.RFC3339),
 				})
 			}
@@ -53,8 +54,9 @@ var listCmd = &cobra.Command{
 			}
 		} else {
 			for _, note := range notes {
-				dateStr := note.ModTime.Format("2006-01-02 15:04")
-				fmt.Printf("%s\t%s\n", note.Slug, dateStr)
+				crDateStr := note.CrTime.Format("2006-01-02 15:04")
+				modDateStr := note.ModTime.Format("2006-01-02 15:04")
+				fmt.Printf("%s\t%s\t%s\n", note.Slug, crDateStr, modDateStr)
 			}
 		}
 	},

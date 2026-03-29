@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"hotnotego/internal/frontmatter"
 	"hotnotego/internal/fsutil"
 )
 
@@ -65,6 +66,7 @@ func (s *Store) Ensure(id string, content []byte) error {
 type NoteInfo struct {
 	Slug    string    // Slug is the URL-safe identifier derived from the filename.
 	RelPath string    // RelPath is the path relative to the workspace root.
+	CrTime  time.Time // CrTime is the creation time derived from frontmatter, falls back to ModTime.
 	ModTime time.Time // ModTime is the last content modification time.
 }
 
@@ -95,9 +97,11 @@ func (s *Store) List() ([]NoteInfo, error) {
 		if err != nil {
 			return fmt.Errorf("list: get file info: %w", err)
 		}
+		crTime := parseCreatedTime(path, info.ModTime())
 		notes = append(notes, NoteInfo{
 			Slug:    slug,
 			RelPath: relPath,
+			CrTime:  crTime,
 			ModTime: info.ModTime(),
 		})
 		return nil
@@ -198,4 +202,31 @@ func (s *Store) Resolve(input string) (string, error) {
 	}
 
 	return matches[0], nil
+}
+
+// parseCreatedTime reads frontmatter created_at from a file, falling back to modTime.
+func parseCreatedTime(path string, modTime time.Time) time.Time {
+	f, err := os.Open(path)
+	if err != nil {
+		return modTime
+	}
+	defer f.Close()
+
+	buf := make([]byte, 512)
+	n, err := f.Read(buf)
+	if err != nil && n == 0 {
+		return modTime
+	}
+
+	data, ok := frontmatter.Extract(buf[:n])
+	if !ok {
+		return modTime
+	}
+
+	crTime, ok := frontmatter.ParseCreatedAt(data)
+	if !ok {
+		return modTime
+	}
+
+	return crTime
 }

@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -244,6 +245,55 @@ func TestList_SkipsDirectories(t *testing.T) {
 	require.NoError(t, err)
 	assert.Len(t, notes, 1)
 	assert.Equal(t, "note", notes[0].Slug)
+}
+
+func TestList_CrTime_FromFrontmatter(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	frontmatter := "---\nid: abc-123\ntitle: Test\ncreated_at: 2025-01-15T10:00:00Z\nupdated_at: 2025-01-15T10:00:00Z\ntags: []\n---\n\n# Test\n"
+	err = os.WriteFile(filepath.Join(workspaceDir, "test.md"), []byte(frontmatter), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	notes, err := store.List()
+	require.NoError(t, err)
+	require.Len(t, notes, 1)
+
+	expectedCrTime := time.Date(2025, 1, 15, 10, 0, 0, 0, time.UTC)
+	assert.Equal(t, expectedCrTime, notes[0].CrTime)
+	assert.NotEqual(t, time.Time{}, notes[0].ModTime)
+}
+
+func TestList_CrTime_FallbackToModTime(t *testing.T) {
+	workspaceDir, err := os.MkdirTemp("", "hotnote-workspace-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(workspaceDir)
+
+	err = os.WriteFile(filepath.Join(workspaceDir, "plain.md"), []byte("# No Frontmatter"), 0644)
+	require.NoError(t, err)
+
+	wm := &mockWorkspaceManager{
+		currentName:  "default",
+		currentPath:  workspaceDir,
+		currentError: nil,
+	}
+
+	store := NewStore(wm)
+
+	notes, err := store.List()
+	require.NoError(t, err)
+	require.Len(t, notes, 1)
+
+	assert.Equal(t, notes[0].ModTime, notes[0].CrTime)
 }
 
 func TestDelete_Success(t *testing.T) {
