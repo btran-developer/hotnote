@@ -30,12 +30,7 @@ var folderCreateCmd = &cobra.Command{
 
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 
 		_, wsPath, err := wm.Current()

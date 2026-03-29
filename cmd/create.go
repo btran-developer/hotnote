@@ -27,12 +27,7 @@ var createCmd = &cobra.Command{
 		title := args[0]
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 		store := storage.NewStore(wm)
 

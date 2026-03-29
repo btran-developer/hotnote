@@ -3,11 +3,13 @@ package cmd
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
 	exitorrors "hotnotego/internal/errors"
+	"hotnotego/internal/workspace"
 )
 
 // RootCmd is the top-level Cobra command for hotnote.
@@ -53,6 +55,26 @@ func outputJSON(v interface{}) error {
 func outputJSONError(errMsg string) {
 	errorResponse := map[string]string{"error": errMsg}
 	outputJSON(errorResponse)
+}
+
+// handleWorkspaceError outputs a workspace initialization error with actionable messages.
+// It inspects the error type to produce specific guidance for the user.
+func handleWorkspaceError(err error) {
+	var msg string
+	switch {
+	case errors.Is(err, workspace.ErrCurrentWorkspaceDangling):
+		msg = "current workspace not found in workspaces. Run: hotnote workspace use <name>"
+	case errors.Is(err, workspace.ErrConfigCorrupt):
+		msg = fmt.Sprintf("config file is corrupt: %v\nDelete ~/.config/hotnote/config.yaml and run: hotnote workspace init", err)
+	default:
+		msg = exitorrors.ErrWorkspaceNotInit.Error()
+	}
+	if jsonFlag {
+		outputJSONError(msg)
+	} else {
+		fmt.Println(msg)
+	}
+	os.Exit(exitorrors.ExitConfigError)
 }
 
 func init() {

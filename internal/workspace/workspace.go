@@ -2,6 +2,7 @@
 package workspace
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -14,6 +15,10 @@ import (
 var (
 	// ErrWorkspaceNotInitialized is returned when trying to use workspace before initialization
 	ErrWorkspaceNotInitialized = errors.New("workspace not initialized")
+	// ErrCurrentWorkspaceDangling is returned when current_workspace references a name not in the workspaces map
+	ErrCurrentWorkspaceDangling = errors.New("current workspace not found in workspaces")
+	// ErrConfigCorrupt is returned when the config file contains invalid data
+	ErrConfigCorrupt = errors.New("config file is corrupt")
 	// ErrWorkspaceAlreadyExists is returned when trying to create a workspace that already exists
 	ErrWorkspaceAlreadyExists = errors.New("workspace already exists")
 	// ErrWorkspaceDoesNotExist is returned when trying to use a workspace that doesn't exist
@@ -63,7 +68,7 @@ func NewManager() (*Manager, error) {
 	}
 
 	// Load existing config if it exists
-	if err := m.load(); err != nil && !os.IsNotExist(err) {
+	if err := m.load(); err != nil {
 		return nil, fmt.Errorf("workspace: load config: %w", err)
 	}
 
@@ -84,12 +89,20 @@ func (m *Manager) load() error {
 		}
 		return fmt.Errorf("workspace: read config file: %w", err)
 	}
-	if err := yaml.Unmarshal(data, m.config); err != nil {
-		return fmt.Errorf("workspace: unmarshal config: %w", err)
+	decoder := yaml.NewDecoder(bytes.NewReader(data))
+	decoder.KnownFields(true)
+	if err := decoder.Decode(m.config); err != nil {
+		return fmt.Errorf("%w: %w", ErrConfigCorrupt, err)
 	}
 	// Ensure Workspaces map is initialized after unmarshaling
 	if m.config.Workspaces == nil {
 		m.config.Workspaces = make(map[string]string)
+	}
+	// Validate current_workspace references an existing key
+	if m.config.CurrentWorkspace != "" {
+		if _, exists := m.config.Workspaces[m.config.CurrentWorkspace]; !exists {
+			return fmt.Errorf("%w: %w", ErrConfigCorrupt, ErrCurrentWorkspaceDangling)
+		}
 	}
 	return nil
 }

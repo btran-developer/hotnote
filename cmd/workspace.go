@@ -26,12 +26,7 @@ var workspaceInitCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 		if err := wm.Init(); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
@@ -65,12 +60,7 @@ var workspaceListCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 		workspaces, current, err := wm.List()
 		if err != nil {
@@ -138,12 +128,7 @@ var workspaceUseCmd = &cobra.Command{
 
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 		if err := wm.Use(name); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceDoesNotExist) {
@@ -196,12 +181,7 @@ var workspaceNewCmd = &cobra.Command{
 
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 		if err := wm.New(name, workspaceNewPath); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
@@ -262,12 +242,7 @@ Examples:
 
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 
 		isDefault := name == "default"
@@ -396,12 +371,7 @@ var workspaceRenameCmd = &cobra.Command{
 
 		wm, err := workspace.NewManager()
 		if err != nil {
-			if jsonFlag {
-				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
-			} else {
-				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
-			}
-			os.Exit(exitorrors.ExitConfigError)
+			handleWorkspaceError(err)
 		}
 
 		if err := wm.Rename(oldName, newName); err != nil {

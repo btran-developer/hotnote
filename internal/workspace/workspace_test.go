@@ -720,3 +720,106 @@ func TestRename_EmptyNewName(t *testing.T) {
 	err = m.Rename("work", "")
 	assert.ErrorIs(t, err, ErrEmptyWorkspaceName)
 }
+
+func TestCurrent_DanglingWorkspace(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+
+	// Directly test load() with a dangling current workspace
+	m := &Manager{
+		configPath: configPath,
+		config:     &Config{Workspaces: make(map[string]string)},
+	}
+
+	// Write config with dangling current_workspace
+	content := "current_workspace: nonexistent\nworkspaces:\n  default: /some/path\n"
+	err = os.WriteFile(configPath, []byte(content), 0644)
+	require.NoError(t, err)
+
+	err = m.load()
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrConfigCorrupt)
+	assert.ErrorIs(t, err, ErrCurrentWorkspaceDangling)
+}
+
+func TestLoad_CorruptYAML(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	err = os.WriteFile(configPath, []byte("{{invalid yaml"), 0644)
+	require.NoError(t, err)
+
+	m := &Manager{
+		configPath: configPath,
+		config:     &Config{Workspaces: make(map[string]string)},
+	}
+
+	err = m.load()
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrConfigCorrupt)
+}
+
+func TestLoad_UnknownFields(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	content := "current_workspace: default\nworkspaces:\n  default: /some/path\nunknown_field: value\n"
+	err = os.WriteFile(configPath, []byte(content), 0644)
+	require.NoError(t, err)
+
+	m := &Manager{
+		configPath: configPath,
+		config:     &Config{Workspaces: make(map[string]string)},
+	}
+
+	err = m.load()
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrConfigCorrupt)
+}
+
+func TestLoad_CurrentWorkspaceNotInMap(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	content := "current_workspace: missing\nworkspaces:\n  default: /some/path\n"
+	err = os.WriteFile(configPath, []byte(content), 0644)
+	require.NoError(t, err)
+
+	m := &Manager{
+		configPath: configPath,
+		config:     &Config{Workspaces: make(map[string]string)},
+	}
+
+	err = m.load()
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrConfigCorrupt)
+}
+
+func TestLoad_InvalidTypes(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configPath := filepath.Join(configDir, "config.yaml")
+	content := "current_workspace: default\nworkspaces: not-a-map\n"
+	err = os.WriteFile(configPath, []byte(content), 0644)
+	require.NoError(t, err)
+
+	m := &Manager{
+		configPath: configPath,
+		config:     &Config{Workspaces: make(map[string]string)},
+	}
+
+	err = m.load()
+	require.Error(t, err)
+	assert.ErrorIs(t, err, ErrConfigCorrupt)
+}

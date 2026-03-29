@@ -637,3 +637,57 @@ func TestWorkspaceRename_Alias_rn(t *testing.T) {
 
 	assert.Equal(t, "renamed", response["status"])
 }
+
+func TestWorkspace_Init_CorruptConfig(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	// Write invalid YAML
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte("{{invalid yaml"), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "init")
+
+	assert.Contains(t, out, "config file is corrupt")
+}
+
+func TestWorkspace_List_DanglingCurrent(t *testing.T) {
+	configDir, err := os.MkdirTemp("", "hotnote-test-*")
+	require.NoError(t, err)
+	defer os.RemoveAll(configDir)
+
+	workspaceDir := filepath.Join(configDir, "workspaces", "default")
+	err = os.MkdirAll(workspaceDir, 0755)
+	require.NoError(t, err)
+
+	configDirPath := filepath.Join(configDir, ".config", "hotnote")
+	err = os.MkdirAll(configDirPath, 0755)
+	require.NoError(t, err)
+
+	// Write config with dangling current_workspace
+	configContent := "current_workspace: nonexistent\nworkspaces:\n  default: " + workspaceDir + "\n"
+	configPath := filepath.Join(configDirPath, "config.yaml")
+	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	require.NoError(t, err)
+
+	t.Setenv("HOME", configDir)
+	out := runHotnote(t, "workspace", "list")
+
+	assert.Contains(t, out, "current workspace not found")
+}
+
+func TestWorkspace_Use_UnknownWorkspace(t *testing.T) {
+	configDir := setupTestWorkspace(t)
+	t.Cleanup(func() { os.RemoveAll(configDir) })
+
+	out := runHotnote(t, "workspace", "use", "nonexistent")
+
+	assert.Contains(t, out, "workspace not found")
+}
