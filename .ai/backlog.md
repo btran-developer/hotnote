@@ -22,10 +22,15 @@
 - [x] Add `--slug` flag to `new` command
 
 ### Issue X: Future AI-Specific Interfaces (Discussion Needed)
-- [ ] Discuss and design AI-specific command interfaces
-- [ ] Consider: metadata extraction, note statistics, search
-- [ ] Evaluate: external LLM integration vs built-in analysis
-- [ ] Decision: implement ai command or extend existing commands
+- [x] Discuss and design AI-specific command interfaces
+- [x] Consider: metadata extraction, note statistics, search
+- [x] Evaluate: external LLM integration vs built-in analysis
+- [x] Decision: implement ai command or extend existing commands
+- [x] **Resolution**: See `.ai/ai/` directory for complete design
+  - Commands: search, summarize, related, tags, ask, extract, dedup
+  - Provider strategy: OpenAI, Anthropic, Ollama, Custom
+  - Architecture documented in `ai-design.md`
+  - Implementation backlog in `ai-backlog.md`
 
 ### Issue D: Documentation Fixes
 - [ ] Remove or implement `--data-dir` flag
