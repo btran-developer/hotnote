@@ -66,7 +66,7 @@ func TestOpen_NotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "note not found: nonexistent", response["error"])
+	assert.Equal(t, "note not found", response["error"])
 }
 
 func TestOpen_MultipleMatches(t *testing.T) {
@@ -95,7 +95,7 @@ func TestOpen_MultipleMatches(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Contains(t, response["error"], "multiple notes match")
+	assert.Contains(t, response["error"], "multiple matches found")
 }
 
 func TestOpen_ExitCode_NotFound(t *testing.T) {

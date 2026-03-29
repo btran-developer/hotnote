@@ -15,12 +15,17 @@
 - [x] Fix `new` command to support `--path` flag
 
 ### Issue C: AI Agent Compatibility
-- [ ] Use `ExitInvalidInput` for "title required", "note exists" errors
-- [ ] Fix `ai` command JSON output
-- [ ] Fix `workspace list` schema to match spec
-- [ ] Make error messages deterministic (remove `%v` formatting)
-- [ ] Add `--no-open` flag to `new` command
-- [ ] Add `--slug` flag to `new` command
+- [x] Use `ExitInvalidInput` for "note exists" errors
+- [x] Remove `ai` command stub (no unique value, covered by existing commands)
+- [x] Fix `workspace list` schema to match spec (`{current, workspaces: []}`)
+- [x] Implement typed errors for deterministic messages (Approach 2)
+- [x] Add `--slug` flag to `new` command
+
+### Issue X: Future AI-Specific Interfaces (Discussion Needed)
+- [ ] Discuss and design AI-specific command interfaces
+- [ ] Consider: metadata extraction, note statistics, search
+- [ ] Evaluate: external LLM integration vs built-in analysis
+- [ ] Decision: implement ai command or extend existing commands
 
 ### Issue D: Documentation Fixes
 - [ ] Remove or implement `--data-dir` flag

@@ -110,7 +110,7 @@ func TestWorkspaceInitJSON_AlreadyInitialized(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "workspace already initialized", response["error"])
+	assert.Equal(t, "workspace already exists", response["error"])
 }
 
 func TestWorkspaceListJSON_Single(t *testing.T) {
@@ -119,16 +119,18 @@ func TestWorkspaceListJSON_Single(t *testing.T) {
 
 	out := runHotnote(t, "workspace", "list", "--json")
 
-	var workspaces []map[string]interface{}
-	err := json.Unmarshal([]byte(out), &workspaces)
+	var response map[string]interface{}
+	err := json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
-	require.Len(t, workspaces, 1)
+	assert.Equal(t, "default", response["current"])
 
-	ws := workspaces[0]
+	workspacesRaw := response["workspaces"].([]interface{})
+	require.Len(t, workspacesRaw, 1)
+
+	ws := workspacesRaw[0].(map[string]interface{})
 	assert.Equal(t, "default", ws["name"])
 	assert.Contains(t, ws, "path")
-	assert.Equal(t, true, ws["current"])
 }
 
 func TestWorkspaceListJSON_Multiple(t *testing.T) {
@@ -154,26 +156,26 @@ func TestWorkspaceListJSON_Multiple(t *testing.T) {
 	t.Setenv("HOME", configDir)
 	out := runHotnote(t, "workspace", "list", "--json")
 
-	var workspaces []map[string]interface{}
-	err = json.Unmarshal([]byte(out), &workspaces)
+	var response map[string]interface{}
+	err = json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
-	require.Len(t, workspaces, 2)
+	assert.Equal(t, "default", response["current"])
+
+	workspacesRaw := response["workspaces"].([]interface{})
+	require.Len(t, workspacesRaw, 2)
 
 	currentFound := false
-	for _, ws := range workspaces {
+	for _, wsRaw := range workspacesRaw {
+		ws := wsRaw.(map[string]interface{})
 		assert.Contains(t, ws, "name")
 		assert.Contains(t, ws, "path")
-		assert.Contains(t, ws, "current")
 
 		if ws["name"] == "default" {
-			assert.Equal(t, true, ws["current"])
 			currentFound = true
-		} else {
-			assert.Equal(t, false, ws["current"])
 		}
 	}
-	assert.True(t, currentFound, "current workspace should be marked")
+	assert.True(t, currentFound, "current workspace should be in list")
 }
 
 func TestWorkspaceUseJSON_Success(t *testing.T) {
@@ -404,12 +406,17 @@ func TestWorkspaceList_Alias_ls(t *testing.T) {
 
 	out := runHotnote(t, "workspace", "ls", "--json")
 
-	var response []map[string]interface{}
+	var response map[string]interface{}
 	err := json.Unmarshal([]byte(out), &response)
 	require.NoError(t, err)
 
-	assert.Len(t, response, 1)
-	assert.Equal(t, "default", response[0]["name"])
+	assert.Equal(t, "default", response["current"])
+
+	workspacesRaw := response["workspaces"].([]interface{})
+	assert.Len(t, workspacesRaw, 1)
+
+	ws := workspacesRaw[0].(map[string]interface{})
+	assert.Equal(t, "default", ws["name"])
 }
 
 func TestWorkspaceDelete_Alias_del(t *testing.T) {

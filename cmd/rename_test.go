@@ -131,7 +131,7 @@ func TestRename_NotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "note not found: nonexistent", response["error"])
+	assert.Equal(t, "note not found", response["error"])
 }
 
 func TestRename_ExitCode_NotFound(t *testing.T) {
@@ -170,7 +170,7 @@ func TestRename_MultipleMatches(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Contains(t, response["error"], "multiple notes match")
+	assert.Contains(t, response["error"], "multiple matches found")
 }
 
 func TestRename_DestExists(t *testing.T) {
@@ -195,7 +195,7 @@ func TestRename_DestExists(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "note already exists: existing", response["error"])
+	assert.Equal(t, "note already exists", response["error"])
 }
 
 func TestRename_RequiresForce_JSON(t *testing.T) {
@@ -303,7 +303,7 @@ func TestRename_NoWorkspace(t *testing.T) {
 
 	out := runHotnote(t, "rename", "old-note", "new-note")
 
-	assert.Contains(t, out, "create workspace manager")
+	assert.Contains(t, out, "workspace not initialized")
 }
 
 func TestRename_ExitCode_NoWorkspace(t *testing.T) {
@@ -340,7 +340,7 @@ func TestRename_EmptySlug(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "invalid title: produces empty slug", response["error"])
+	assert.Equal(t, "slug produces empty value", response["error"])
 }
 
 func TestRename_EmptySlug_ExitCode(t *testing.T) {

@@ -36,11 +36,11 @@ var renderCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 
 		store := storage.NewStore(wm)
@@ -48,25 +48,25 @@ var renderCmd = &cobra.Command{
 		resolvedSlug, err := store.Resolve(title)
 		if errors.Is(err, storage.ErrNoteNotFound) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("note not found: %s", title))
+				outputJSONError(exitorrors.ErrNoteNotFound.Error())
 			} else {
-				fmt.Printf("note not found: %s\n", title)
+				fmt.Println(exitorrors.ErrNoteNotFound.Error())
 			}
 			os.Exit(exitorrors.ExitNotFound)
 		}
 		if errors.Is(err, storage.ErrMultipleMatches) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("multiple notes match '%s': use a more specific path", title))
+				outputJSONError(exitorrors.ErrMultipleMatches.Error())
 			} else {
-				fmt.Printf("multiple notes match '%s': use a more specific path\n", title)
+				fmt.Println(exitorrors.ErrMultipleMatches.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("resolve note: %v", err))
+				outputJSONError(exitorrors.ErrNoteResolve.Error())
 			} else {
-				fmt.Printf("resolve note: %v\n", err)
+				fmt.Println(exitorrors.ErrNoteResolve.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -74,9 +74,9 @@ var renderCmd = &cobra.Command{
 		path, err := store.Path(resolvedSlug)
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("get note path: %v", err))
+				outputJSONError(exitorrors.ErrNotePath.Error())
 			} else {
-				fmt.Printf("get note path: %v\n", err)
+				fmt.Println(exitorrors.ErrNotePath.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -107,9 +107,9 @@ var renderCmd = &cobra.Command{
 		err = md.Convert([]byte(renderContent), &buf)
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("render markdown: %v", err))
+				outputJSONError(exitorrors.ErrNoteRender.Error())
 			} else {
-				fmt.Printf("render markdown: %v\n", err)
+				fmt.Println(exitorrors.ErrNoteRender.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -117,7 +117,7 @@ var renderCmd = &cobra.Command{
 		if jsonFlag {
 			jsonResponse := map[string]string{"content": buf.String()}
 			if err := outputJSON(jsonResponse); err != nil {
-				outputJSONError(fmt.Sprintf("marshal JSON: %v", err))
+				outputJSONError(exitorrors.ErrMarshalJSON.Error())
 				os.Exit(exitorrors.ExitGeneral)
 			}
 		} else {

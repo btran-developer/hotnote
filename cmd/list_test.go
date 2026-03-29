@@ -116,7 +116,7 @@ func TestList_NoWorkspace(t *testing.T) {
 
 	out := runHotnote(t, "list")
 
-	assert.Contains(t, out, "create workspace manager")
+	assert.Contains(t, out, "workspace not initialized")
 }
 
 func TestList_Alias_ls(t *testing.T) {

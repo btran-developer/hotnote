@@ -96,7 +96,7 @@ func TestCreate_WithPath_NestedDuplicate(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Contains(t, response["error"], "note already exists: folder/note")
+	assert.Contains(t, response["error"], "note already exists")
 }
 
 func TestCreate_WithPath_EmptySlug(t *testing.T) {
@@ -110,7 +110,7 @@ func TestCreate_WithPath_EmptySlug(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "invalid title: produces empty slug", response["error"])
+	assert.Equal(t, "slug produces empty value", response["error"])
 }
 
 func TestCreate_WithPath_ExitCode_AlreadyExists(t *testing.T) {
@@ -127,8 +127,8 @@ func TestCreate_WithPath_ExitCode_AlreadyExists(t *testing.T) {
 	require.NoError(t, err)
 
 	code := runHotnoteWithExitCode(t, "create", "Existing", "--path", "projects")
-	if code != 1 {
-		t.Errorf("expected exit code 1, got %d", code)
+	if code != 3 {
+		t.Errorf("expected exit code 3, got %d", code)
 	}
 }
 

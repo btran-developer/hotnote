@@ -27,24 +27,24 @@ var workspaceInitCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 		if err := wm.Init(); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
 				if jsonFlag {
-					outputJSONError("workspace already initialized")
+					outputJSONError(exitorrors.ErrWorkspaceExists.Error())
 				} else {
-					fmt.Println("workspace already initialized")
+					fmt.Println(exitorrors.ErrWorkspaceExists.Error())
 				}
 			} else {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("init workspace: %v", err))
+					outputJSONError(exitorrors.ErrWorkspaceInit.Error())
 				} else {
-					fmt.Printf("init workspace: %v\n", err)
+					fmt.Println(exitorrors.ErrWorkspaceInit.Error())
 				}
 			}
 			os.Exit(exitorrors.ExitGeneral)
@@ -66,18 +66,18 @@ var workspaceListCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 		workspaces, current, err := wm.List()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("list workspaces: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceList.Error())
 			} else {
-				fmt.Printf("list workspaces: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceList.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -90,22 +90,22 @@ var workspaceListCmd = &cobra.Command{
 		sort.Strings(workspaceNames)
 
 		if jsonFlag {
-			var wsList []map[string]interface{}
+			var wsList []map[string]string
 			for _, name := range workspaceNames {
 				path := workspaces[name]
-				ws := map[string]interface{}{
+				ws := map[string]string{
 					"name": name,
 					"path": path,
 				}
-				if name == current {
-					ws["current"] = true
-				} else {
-					ws["current"] = false
-				}
 				wsList = append(wsList, ws)
 			}
-			if err := outputJSON(wsList); err != nil {
-				outputJSONError(fmt.Sprintf("marshal JSON: %v", err))
+			response := map[string]interface{}{
+				"current":    current,
+				"workspaces": wsList,
+			}
+			if err := outputJSON(response); err != nil {
+				outputJSONError(exitorrors.ErrMarshalJSON.Error())
+				os.Exit(exitorrors.ExitGeneral)
 			}
 		} else {
 			fmt.Printf("Found %d workspaces\n", len(workspaces))
@@ -129,9 +129,9 @@ var workspaceUseCmd = &cobra.Command{
 		name := slugifypkg.Slugify(args[0])
 		if name == "" {
 			if jsonFlag {
-				outputJSONError("invalid workspace name: produces empty slug")
+				outputJSONError(exitorrors.ErrEmptySlug.Error())
 			} else {
-				fmt.Println("invalid workspace name: produces empty slug")
+				fmt.Println(exitorrors.ErrEmptySlug.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
@@ -139,25 +139,25 @@ var workspaceUseCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 		if err := wm.Use(name); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceDoesNotExist) {
 				if jsonFlag {
-					outputJSONError("workspace not found")
+					outputJSONError(exitorrors.ErrWorkspaceNotFound.Error())
 				} else {
-					fmt.Println("workspace not found")
+					fmt.Println(exitorrors.ErrWorkspaceNotFound.Error())
 				}
 				os.Exit(exitorrors.ExitNotFound)
 			} else {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("use workspace: %v", err))
+					outputJSONError(exitorrors.ErrWorkspaceUse.Error())
 				} else {
-					fmt.Printf("use workspace: %v\n", err)
+					fmt.Println(exitorrors.ErrWorkspaceUse.Error())
 				}
 				os.Exit(exitorrors.ExitGeneral)
 			}
@@ -187,9 +187,9 @@ var workspaceNewCmd = &cobra.Command{
 		name := slugifypkg.Slugify(args[0])
 		if name == "" {
 			if jsonFlag {
-				outputJSONError("invalid workspace name: produces empty slug")
+				outputJSONError(exitorrors.ErrEmptySlug.Error())
 			} else {
-				fmt.Println("invalid workspace name: produces empty slug")
+				fmt.Println(exitorrors.ErrEmptySlug.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
@@ -197,18 +197,18 @@ var workspaceNewCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 		if err := wm.New(name, workspaceNewPath); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
 				if jsonFlag {
-					outputJSONError("workspace already exists")
+					outputJSONError(exitorrors.ErrWorkspaceExists.Error())
 				} else {
-					fmt.Println("workspace already exists")
+					fmt.Println(exitorrors.ErrWorkspaceExists.Error())
 				}
 			} else {
 				if jsonFlag {
@@ -253,9 +253,9 @@ Examples:
 		name := slugifypkg.Slugify(args[0])
 		if name == "" {
 			if jsonFlag {
-				outputJSONError("invalid workspace name: produces empty slug")
+				outputJSONError(exitorrors.ErrEmptySlug.Error())
 			} else {
-				fmt.Println("invalid workspace name: produces empty slug")
+				fmt.Println(exitorrors.ErrEmptySlug.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
@@ -263,11 +263,11 @@ Examples:
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 
 		isDefault := name == "default"
@@ -322,9 +322,9 @@ Examples:
 			}
 			if !exists {
 				if jsonFlag {
-					outputJSONError("workspace not found")
+					outputJSONError(exitorrors.ErrWorkspaceNotFound.Error())
 				} else {
-					fmt.Println("workspace not found")
+					fmt.Println(exitorrors.ErrWorkspaceNotFound.Error())
 				}
 				os.Exit(exitorrors.ExitNotFound)
 			}
@@ -387,9 +387,9 @@ var workspaceRenameCmd = &cobra.Command{
 		newName := slugifypkg.Slugify(args[1])
 		if newName == "" {
 			if jsonFlag {
-				outputJSONError("invalid workspace name: produces empty slug")
+				outputJSONError(exitorrors.ErrEmptySlug.Error())
 			} else {
-				fmt.Println("invalid workspace name: produces empty slug")
+				fmt.Println(exitorrors.ErrEmptySlug.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
@@ -397,27 +397,27 @@ var workspaceRenameCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 
 		if err := wm.Rename(oldName, newName); err != nil {
 			if errors.Is(err, workspace.ErrWorkspaceDoesNotExist) {
 				if jsonFlag {
-					outputJSONError("workspace not found")
+					outputJSONError(exitorrors.ErrWorkspaceNotFound.Error())
 				} else {
-					fmt.Println("workspace not found")
+					fmt.Println(exitorrors.ErrWorkspaceNotFound.Error())
 				}
 				os.Exit(exitorrors.ExitNotFound)
 			}
 			if errors.Is(err, workspace.ErrWorkspaceAlreadyExists) {
 				if jsonFlag {
-					outputJSONError("workspace already exists")
+					outputJSONError(exitorrors.ErrWorkspaceExists.Error())
 				} else {
-					fmt.Println("workspace already exists")
+					fmt.Println(exitorrors.ErrWorkspaceExists.Error())
 				}
 				os.Exit(exitorrors.ExitInvalidInput)
 			}

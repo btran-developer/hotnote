@@ -83,7 +83,7 @@ func TestFolderRename_SourceNotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "folder not found: nonexistent", response["error"])
+	assert.Equal(t, "folder not found", response["error"])
 }
 
 func TestFolderRename_DestinationExists(t *testing.T) {
@@ -106,7 +106,7 @@ func TestFolderRename_DestinationExists(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "folder already exists: new-folder", response["error"])
+	assert.Equal(t, "folder already exists", response["error"])
 }
 
 func TestFolderRename_RejectsWorkspaceRoot(t *testing.T) {
@@ -279,7 +279,7 @@ func TestFolderCreate_AlreadyExists(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "folder already exists: existing", response["error"])
+	assert.Equal(t, "folder already exists", response["error"])
 }
 
 func TestFolderDelete_JSON_Success(t *testing.T) {
@@ -334,7 +334,7 @@ func TestFolderDelete_NotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "folder not found: nonexistent", response["error"])
+	assert.Equal(t, "folder not found", response["error"])
 }
 
 func TestFolderDelete_NonEmpty_WithForce(t *testing.T) {
@@ -500,7 +500,7 @@ func TestFolderList_InvalidPath(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Contains(t, response["error"], "path not found")
+	assert.Contains(t, response["error"], "folder not found")
 }
 
 func TestFolderList_PathTraversal(t *testing.T) {

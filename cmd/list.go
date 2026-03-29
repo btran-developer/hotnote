@@ -19,9 +19,9 @@ var listCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -31,9 +31,9 @@ var listCmd = &cobra.Command{
 		notes, err := store.List()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("list notes: %v", err))
+				outputJSONError(exitorrors.ErrNoteList.Error())
 			} else {
-				fmt.Printf("list notes: %v\n", err)
+				fmt.Println(exitorrors.ErrNoteList.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -48,7 +48,8 @@ var listCmd = &cobra.Command{
 				})
 			}
 			if err := outputJSON(jsonNotes); err != nil {
-				outputJSONError(fmt.Sprintf("marshal JSON: %v", err))
+				outputJSONError(exitorrors.ErrMarshalJSON.Error())
+				os.Exit(exitorrors.ExitGeneral)
 			}
 		} else {
 			for _, note := range notes {

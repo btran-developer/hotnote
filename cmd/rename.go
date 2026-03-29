@@ -28,9 +28,9 @@ var renameCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -40,25 +40,25 @@ var renameCmd = &cobra.Command{
 		resolvedSlug, err := store.Resolve(oldSlug)
 		if errors.Is(err, storage.ErrNoteNotFound) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("note not found: %s", oldSlug))
+				outputJSONError(exitorrors.ErrNoteNotFound.Error())
 			} else {
-				fmt.Printf("note not found: %s\n", oldSlug)
+				fmt.Println(exitorrors.ErrNoteNotFound.Error())
 			}
 			os.Exit(exitorrors.ExitNotFound)
 		}
 		if errors.Is(err, storage.ErrMultipleMatches) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("multiple notes match '%s': use a more specific path", oldSlug))
+				outputJSONError(exitorrors.ErrMultipleMatches.Error())
 			} else {
-				fmt.Printf("multiple notes match '%s': use a more specific path\n", oldSlug)
+				fmt.Println(exitorrors.ErrMultipleMatches.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("resolve note: %v", err))
+				outputJSONError(exitorrors.ErrNoteResolve.Error())
 			} else {
-				fmt.Printf("resolve note: %v\n", err)
+				fmt.Println(exitorrors.ErrNoteResolve.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -67,9 +67,9 @@ var renameCmd = &cobra.Command{
 
 		if newSlug == "" {
 			if jsonFlag {
-				outputJSONError("invalid title: produces empty slug")
+				outputJSONError(exitorrors.ErrEmptySlug.Error())
 			} else {
-				fmt.Println("invalid title: produces empty slug")
+				fmt.Println(exitorrors.ErrEmptySlug.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
@@ -109,15 +109,16 @@ var renameCmd = &cobra.Command{
 		if err := store.Rename(resolvedSlug, newSlug); err != nil {
 			if errors.Is(err, storage.ErrNoteAlreadyExists) {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("note already exists: %s", newSlug))
+					outputJSONError(exitorrors.ErrNoteExists.Error())
 				} else {
-					fmt.Printf("note already exists: %s\n", newSlug)
+					fmt.Println(exitorrors.ErrNoteExists.Error())
 				}
+				os.Exit(exitorrors.ExitInvalidInput)
 			} else {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("rename note: %v", err))
+					outputJSONError(exitorrors.ErrNoteRename.Error())
 				} else {
-					fmt.Printf("rename note: %v\n", err)
+					fmt.Println(exitorrors.ErrNoteRename.Error())
 				}
 			}
 			os.Exit(exitorrors.ExitGeneral)

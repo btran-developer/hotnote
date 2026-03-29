@@ -38,9 +38,9 @@ var folderRenameCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -48,9 +48,9 @@ var folderRenameCmd = &cobra.Command{
 		_, wsPath, err := wm.Current()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError("workspace not initialized")
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Println("workspace not initialized")
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -66,9 +66,9 @@ var folderRenameCmd = &cobra.Command{
 				os.Exit(exitorrors.ExitInvalidInput)
 			}
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("validate path: %v", err))
+				outputJSONError(exitorrors.ErrInvalidFolderPath.Error())
 			} else {
-				fmt.Printf("validate path: %v\n", err)
+				fmt.Println(exitorrors.ErrInvalidFolderPath.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -85,16 +85,16 @@ var folderRenameCmd = &cobra.Command{
 		if _, err := os.Stat(oldValidation.FolderPath); err != nil {
 			if os.IsNotExist(err) {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("folder not found: %s", oldFolder))
+					outputJSONError(exitorrors.ErrFolderNotFound.Error())
 				} else {
-					fmt.Printf("folder not found: %s\n", oldFolder)
+					fmt.Println(exitorrors.ErrFolderNotFound.Error())
 				}
 				os.Exit(exitorrors.ExitNotFound)
 			}
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("check folder: %v", err))
+				outputJSONError(exitorrors.ErrFolderRead.Error())
 			} else {
-				fmt.Printf("check folder: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderRead.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -110,9 +110,9 @@ var folderRenameCmd = &cobra.Command{
 				os.Exit(exitorrors.ExitInvalidInput)
 			}
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("validate path: %v", err))
+				outputJSONError(exitorrors.ErrInvalidFolderPath.Error())
 			} else {
-				fmt.Printf("validate path: %v\n", err)
+				fmt.Println(exitorrors.ErrInvalidFolderPath.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -120,17 +120,17 @@ var folderRenameCmd = &cobra.Command{
 		if _, err := os.Stat(newValidation.FolderPath); err != nil {
 			if !os.IsNotExist(err) {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("check folder: %v", err))
+					outputJSONError(exitorrors.ErrFolderRead.Error())
 				} else {
-					fmt.Printf("check folder: %v\n", err)
+					fmt.Println(exitorrors.ErrFolderRead.Error())
 				}
 				os.Exit(exitorrors.ExitGeneral)
 			}
 		} else {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("folder already exists: %s", newFolder))
+				outputJSONError(exitorrors.ErrFolderExists.Error())
 			} else {
-				fmt.Printf("folder already exists: %s\n", newFolder)
+				fmt.Println(exitorrors.ErrFolderExists.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -138,18 +138,18 @@ var folderRenameCmd = &cobra.Command{
 		parentDir := filepath.Dir(newValidation.AbsFolderPath)
 		if err := os.MkdirAll(parentDir, 0755); err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create parent directory: %v", err))
+				outputJSONError(exitorrors.ErrFolderCreate.Error())
 			} else {
-				fmt.Printf("create parent directory: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderCreate.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		if err := os.Rename(oldValidation.FolderPath, newValidation.FolderPath); err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("rename folder: %v", err))
+				outputJSONError(exitorrors.ErrFolderRename.Error())
 			} else {
-				fmt.Printf("rename folder: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderRename.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}

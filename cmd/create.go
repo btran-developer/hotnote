@@ -16,6 +16,7 @@ import (
 )
 
 var createPath string
+var createSlug string
 
 var createCmd = &cobra.Command{
 	Use:     "create [title]",
@@ -27,20 +28,25 @@ var createCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 		store := storage.NewStore(wm)
 
-		baseSlug := slugifypkg.Slugify(title)
+		var baseSlug string
+		if createSlug != "" {
+			baseSlug = slugifypkg.Slugify(createSlug)
+		} else {
+			baseSlug = slugifypkg.Slugify(title)
+		}
 		if baseSlug == "" {
 			if jsonFlag {
-				outputJSONError("invalid title: produces empty slug")
+				outputJSONError(exitorrors.ErrEmptySlug.Error())
 			} else {
-				fmt.Println("invalid title: produces empty slug")
+				fmt.Println(exitorrors.ErrEmptySlug.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
@@ -60,24 +66,25 @@ var createCmd = &cobra.Command{
 		if err := store.Ensure(fullSlug, []byte(frontmatter)); err != nil {
 			if errors.Is(err, os.ErrExist) {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("note already exists: %s", fullSlug))
+					outputJSONError(exitorrors.ErrNoteExists.Error())
 				} else {
-					fmt.Printf("note already exists: %s\n", fullSlug)
+					fmt.Println(exitorrors.ErrNoteExists.Error())
 				}
+				os.Exit(exitorrors.ExitInvalidInput)
 			} else {
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("create note: %v", err))
+					outputJSONError(exitorrors.ErrNoteCreate.Error())
 				} else {
-					fmt.Printf("create note: %v\n", err)
+					fmt.Println(exitorrors.ErrNoteCreate.Error())
 				}
+				os.Exit(exitorrors.ExitGeneral)
 			}
-			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		if jsonFlag {
 			path, err := store.Path(fullSlug)
 			if err != nil {
-				outputJSONError(fmt.Sprintf("get note path: %v", err))
+				outputJSONError(exitorrors.ErrNotePath.Error())
 				os.Exit(exitorrors.ExitGeneral)
 			}
 			response := map[string]string{
@@ -94,5 +101,6 @@ var createCmd = &cobra.Command{
 
 func init() {
 	createCmd.Flags().StringVar(&createPath, "path", "", "Subfolder path for the new note (e.g., projects/todo)")
+	createCmd.Flags().StringVar(&createSlug, "slug", "", "Custom slug for the note")
 	RootCmd.AddCommand(createCmd)
 }

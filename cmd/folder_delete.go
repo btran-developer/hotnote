@@ -26,9 +26,9 @@ var folderDeleteCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -54,9 +54,9 @@ var folderDeleteCmd = &cobra.Command{
 				os.Exit(exitorrors.ExitInvalidInput)
 			}
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("validate path: %v", err))
+				outputJSONError(exitorrors.ErrInvalidFolderPath.Error())
 			} else {
-				fmt.Printf("validate path: %v\n", err)
+				fmt.Println(exitorrors.ErrInvalidFolderPath.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -72,21 +72,29 @@ var folderDeleteCmd = &cobra.Command{
 
 		folderPath := validation.FolderPath
 
-		if _, err := os.Stat(folderPath); os.IsNotExist(err) {
-			if jsonFlag {
-				outputJSONError(fmt.Sprintf("folder not found: %s", folder))
-			} else {
-				fmt.Printf("folder not found: %s\n", folder)
+		if _, err := os.Stat(folderPath); err != nil {
+			if os.IsNotExist(err) {
+				if jsonFlag {
+					outputJSONError(exitorrors.ErrFolderNotFound.Error())
+				} else {
+					fmt.Println(exitorrors.ErrFolderNotFound.Error())
+				}
+				os.Exit(exitorrors.ExitNotFound)
 			}
-			os.Exit(exitorrors.ExitNotFound)
+			if jsonFlag {
+				outputJSONError(exitorrors.ErrFolderRead.Error())
+			} else {
+				fmt.Println(exitorrors.ErrFolderRead.Error())
+			}
+			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		entries, err := os.ReadDir(folderPath)
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("read folder: %v", err))
+				outputJSONError(exitorrors.ErrFolderRead.Error())
 			} else {
-				fmt.Printf("read folder: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderRead.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -113,9 +121,9 @@ var folderDeleteCmd = &cobra.Command{
 
 		if err := os.RemoveAll(folderPath); err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("delete folder: %v", err))
+				outputJSONError(exitorrors.ErrFolderDelete.Error())
 			} else {
-				fmt.Printf("delete folder: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderDelete.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}

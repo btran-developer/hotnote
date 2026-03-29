@@ -65,7 +65,7 @@ func TestRender_NotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "note not found: nonexistent", response["error"])
+	assert.Equal(t, "note not found", response["error"])
 }
 
 func TestRender_MultipleMatches(t *testing.T) {
@@ -94,7 +94,7 @@ func TestRender_MultipleMatches(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Contains(t, response["error"], "multiple notes match")
+	assert.Contains(t, response["error"], "multiple matches found")
 }
 
 func TestRender_ExitCode_NotFound(t *testing.T) {

@@ -22,9 +22,9 @@ var folderListCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -54,9 +54,9 @@ var folderListCmd = &cobra.Command{
 					os.Exit(exitorrors.ExitInvalidInput)
 				}
 				if jsonFlag {
-					outputJSONError(fmt.Sprintf("validate path: %v", err))
+					outputJSONError(exitorrors.ErrInvalidFolderPath.Error())
 				} else {
-					fmt.Printf("validate path: %v\n", err)
+					fmt.Println(exitorrors.ErrInvalidFolderPath.Error())
 				}
 				os.Exit(exitorrors.ExitGeneral)
 			}
@@ -66,17 +66,17 @@ var folderListCmd = &cobra.Command{
 		info, err := os.Stat(targetPath)
 		if os.IsNotExist(err) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("path not found: %s", userPathArg))
+				outputJSONError(exitorrors.ErrFolderNotFound.Error())
 			} else {
-				fmt.Printf("path not found: %s\n", userPathArg)
+				fmt.Println(exitorrors.ErrFolderNotFound.Error())
 			}
 			os.Exit(exitorrors.ExitNotFound)
 		}
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("check path: %v", err))
+				outputJSONError(exitorrors.ErrFolderRead.Error())
 			} else {
-				fmt.Printf("check path: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderRead.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -92,9 +92,9 @@ var folderListCmd = &cobra.Command{
 		entries, err := os.ReadDir(targetPath)
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("read directory: %v", err))
+				outputJSONError(exitorrors.ErrFolderRead.Error())
 			} else {
-				fmt.Printf("read directory: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderRead.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -135,7 +135,7 @@ var folderListCmd = &cobra.Command{
 
 		if jsonFlag {
 			if err := outputJSON(items); err != nil {
-				outputJSONError(fmt.Sprintf("marshal JSON: %v", err))
+				outputJSONError(exitorrors.ErrMarshalJSON.Error())
 				os.Exit(exitorrors.ExitGeneral)
 			}
 		} else {

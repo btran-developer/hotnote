@@ -85,7 +85,7 @@ func TestDelete_NotFound(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Equal(t, "note not found: nonexistent", response["error"])
+	assert.Equal(t, "note not found", response["error"])
 }
 
 func TestDelete_ExitCode_NotFound(t *testing.T) {
@@ -124,7 +124,7 @@ func TestDelete_MultipleMatches(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Contains(t, response, "error")
-	assert.Contains(t, response["error"], "multiple notes match")
+	assert.Contains(t, response["error"], "multiple matches found")
 }
 
 func TestDelete_RequiresForce_JSON(t *testing.T) {
@@ -160,7 +160,7 @@ func TestDelete_NoWorkspace(t *testing.T) {
 
 	out := runHotnote(t, "delete", "testnote")
 
-	assert.Contains(t, out, "create workspace manager")
+	assert.Contains(t, out, "workspace not initialized")
 }
 
 func TestDelete_ExitCode_NoWorkspace(t *testing.T) {

@@ -22,11 +22,11 @@ var openCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
-			os.Exit(exitorrors.ExitGeneral)
+			os.Exit(exitorrors.ExitConfigError)
 		}
 
 		store := storage.NewStore(wm)
@@ -34,25 +34,25 @@ var openCmd = &cobra.Command{
 		resolvedSlug, err := store.Resolve(title)
 		if errors.Is(err, storage.ErrNoteNotFound) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("note not found: %s", title))
+				outputJSONError(exitorrors.ErrNoteNotFound.Error())
 			} else {
-				fmt.Printf("note not found: %s\n", title)
+				fmt.Println(exitorrors.ErrNoteNotFound.Error())
 			}
 			os.Exit(exitorrors.ExitNotFound)
 		}
 		if errors.Is(err, storage.ErrMultipleMatches) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("multiple notes match '%s': use a more specific path", title))
+				outputJSONError(exitorrors.ErrMultipleMatches.Error())
 			} else {
-				fmt.Printf("multiple notes match '%s': use a more specific path\n", title)
+				fmt.Println(exitorrors.ErrMultipleMatches.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("resolve note: %v", err))
+				outputJSONError(exitorrors.ErrNoteResolve.Error())
 			} else {
-				fmt.Printf("resolve note: %v\n", err)
+				fmt.Println(exitorrors.ErrNoteResolve.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -60,9 +60,9 @@ var openCmd = &cobra.Command{
 		path, err := store.Path(resolvedSlug)
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("get note path: %v", err))
+				outputJSONError(exitorrors.ErrNotePath.Error())
 			} else {
-				fmt.Printf("get note path: %v\n", err)
+				fmt.Println(exitorrors.ErrNotePath.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -87,7 +87,7 @@ var openCmd = &cobra.Command{
 		editorCmd.Stderr = os.Stderr
 
 		if err := editorCmd.Run(); err != nil {
-			fmt.Printf("open editor: %v\n", err)
+			fmt.Println(exitorrors.WithContext(exitorrors.ErrOpenEditor, editor))
 			os.Exit(exitorrors.ExitGeneral)
 		}
 	},

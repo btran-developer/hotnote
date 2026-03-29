@@ -31,9 +31,9 @@ var folderCreateCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -41,9 +41,9 @@ var folderCreateCmd = &cobra.Command{
 		_, wsPath, err := wm.Current()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError("workspace not initialized")
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Println("workspace not initialized")
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -59,9 +59,9 @@ var folderCreateCmd = &cobra.Command{
 				os.Exit(exitorrors.ExitInvalidInput)
 			}
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("validate path: %v", err))
+				outputJSONError(exitorrors.ErrInvalidFolderPath.Error())
 			} else {
-				fmt.Printf("validate path: %v\n", err)
+				fmt.Println(exitorrors.ErrInvalidFolderPath.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -70,25 +70,25 @@ var folderCreateCmd = &cobra.Command{
 
 		if _, err := os.Stat(folderPath); err == nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("folder already exists: %s", folder))
+				outputJSONError(exitorrors.ErrFolderExists.Error())
 			} else {
-				fmt.Printf("folder already exists: %s\n", folder)
+				fmt.Println(exitorrors.ErrFolderExists.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		} else if !os.IsNotExist(err) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("check folder: %v", err))
+				outputJSONError(exitorrors.ErrFolderRead.Error())
 			} else {
-				fmt.Printf("check folder: %v\n", err)
+				fmt.Println(exitorrors.ErrFolderRead.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
 
 		if err := os.MkdirAll(folderPath, 0755); err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create folder: %v", err))
+				outputJSONError(exitorrors.WithContext(exitorrors.ErrFolderCreate, folderPath))
 			} else {
-				fmt.Printf("create folder: %v\n", err)
+				fmt.Println(exitorrors.WithContext(exitorrors.ErrFolderCreate, folderPath))
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}

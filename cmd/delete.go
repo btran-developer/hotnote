@@ -26,9 +26,9 @@ var deleteCmd = &cobra.Command{
 		wm, err := workspace.NewManager()
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("create workspace manager: %v", err))
+				outputJSONError(exitorrors.ErrWorkspaceNotInit.Error())
 			} else {
-				fmt.Printf("create workspace manager: %v\n", err)
+				fmt.Println(exitorrors.ErrWorkspaceNotInit.Error())
 			}
 			os.Exit(exitorrors.ExitConfigError)
 		}
@@ -38,25 +38,25 @@ var deleteCmd = &cobra.Command{
 		resolvedSlug, err := store.Resolve(slug)
 		if errors.Is(err, storage.ErrNoteNotFound) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("note not found: %s", slug))
+				outputJSONError(exitorrors.ErrNoteNotFound.Error())
 			} else {
-				fmt.Printf("note not found: %s\n", slug)
+				fmt.Println(exitorrors.ErrNoteNotFound.Error())
 			}
 			os.Exit(exitorrors.ExitNotFound)
 		}
 		if errors.Is(err, storage.ErrMultipleMatches) {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("multiple notes match '%s': use a more specific path", slug))
+				outputJSONError(exitorrors.ErrMultipleMatches.Error())
 			} else {
-				fmt.Printf("multiple notes match '%s': use a more specific path\n", slug)
+				fmt.Println(exitorrors.ErrMultipleMatches.Error())
 			}
 			os.Exit(exitorrors.ExitInvalidInput)
 		}
 		if err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("resolve note: %v", err))
+				outputJSONError(exitorrors.ErrNoteResolve.Error())
 			} else {
-				fmt.Printf("resolve note: %v\n", err)
+				fmt.Println(exitorrors.ErrNoteResolve.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
@@ -81,9 +81,9 @@ var deleteCmd = &cobra.Command{
 
 		if err := store.Delete(resolvedSlug); err != nil {
 			if jsonFlag {
-				outputJSONError(fmt.Sprintf("delete note: %v", err))
+				outputJSONError(exitorrors.ErrNoteDelete.Error())
 			} else {
-				fmt.Printf("delete note: %v\n", err)
+				fmt.Println(exitorrors.ErrNoteDelete.Error())
 			}
 			os.Exit(exitorrors.ExitGeneral)
 		}
